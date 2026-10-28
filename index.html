@@ -1,0 +1,1469 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#000000"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>VESCDash</title>
+<style>:root{--bg:#000;--panel:#090d13;--stroke:rgba(0,140,255,.22);--neon:#00b8ff;--neon2:#3de3ff;--amber:#ffb021;--red:#ff3b4f;--green:#33f29a;--dim:rgba(255,255,255,.55);--faint:rgba(255,255,255,.32);--font:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:#fff;font-family:var(--font);font-size:15px}
+body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+h1{font-size:24px;margin:14px 2px 10px}h2{margin:0 0 8px;font-size:19px}
+main{max-width:640px;margin:0 auto;padding:0 14px 20px}
+#demo{background:var(--amber);color:#000;font-weight:800;font-size:11px;letter-spacing:.06em;text-align:center;padding:6px;position:sticky;top:0;z-index:5}
+#alerts{position:sticky;top:0;z-index:4;max-width:640px;margin:0 auto;padding:0 10px}
+.alert{display:flex;flex-direction:column;padding:9px 12px;border-radius:12px;margin-top:6px;font-size:13px}
+.alert b{font-size:14px}.alert.critical{background:rgba(255,59,79,.92)}.alert.caution{background:rgba(255,176,33,.92);color:#000}
+.card{background:var(--panel);border:1px solid var(--stroke);border-radius:18px;padding:14px;margin:12px 0}
+.center{text-align:center}
+.head,.row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.row{margin:8px 0}.sp{flex:1}
+.lbl{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin:6px 0}
+.dim{color:var(--dim)}.faint{color:var(--faint)}.small{font-size:12px}.mono{font-family:ui-monospace,Menlo,monospace}
+.neon{color:var(--neon)}.amber{color:var(--amber)}.red{color:var(--red)}.green{color:var(--green)}.warn{color:var(--amber)}
+.btn{font:inherit;font-weight:600;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 14px;cursor:pointer}
+.btn:disabled{opacity:.35}.btn.primary{background:var(--neon);border-color:var(--neon);color:#001018}.btn.danger{background:var(--red);border-color:var(--red)}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:#000}.btn.ghost{background:none;border-color:transparent;color:var(--neon)}.btn.small{padding:6px 10px;font-size:13px}.btn.wide{width:100%;margin-top:6px}
+.brand{color:var(--neon);font-weight:800;letter-spacing:.15em;font-size:13px}
+.pill{border:1.5px solid var(--neon);color:var(--neon);border-radius:99px;padding:3px 11px;font-weight:800;font-size:12px;margin-left:auto}.pill.solid{background:var(--neon);color:#000;margin-left:0}
+.gauge{position:relative;width:min(300px,82vw);margin:0 auto;aspect-ratio:1}
+.gauge svg{width:100%;height:100%}.gauge path{fill:none;stroke-linecap:round}.gauge .track{stroke:rgba(255,255,255,.07)}
+.gauge .fill{stroke:var(--neon);filter:drop-shadow(0 0 8px var(--neon));transition:d .3s}.gauge .fill2{stroke:var(--neon2);filter:drop-shadow(0 0 5px var(--neon2))}
+.gcenter{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.big{font-size:min(84px,22vw);font-weight:700;font-variant-numeric:tabular-nums;line-height:1;text-shadow:0 0 18px rgba(0,184,255,.6)}
+.unit{color:var(--dim);font-weight:600}.watts{margin-top:12px;font-size:20px;color:var(--neon2);font-variant-numeric:tabular-nums}.watts.green{color:var(--green)}
+.batt{display:flex;align-items:baseline;gap:6px;font-size:18px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:4px}
+.bar{height:8px;border-radius:9px;background:rgba(255,255,255,.07);overflow:hidden;margin-top:6px}.bar div{height:100%;border-radius:9px;transition:width .5s;background:var(--green)}
+.bar .amber{background:var(--amber)}.bar .red{background:var(--red)}.bar .green{background:var(--green);box-shadow:0 0 8px var(--green)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}
+.tile{background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:11px 12px;min-width:0}
+.tt{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;margin-top:3px;white-space:nowrap}.tv small{font-size:11px;color:var(--dim);margin-left:3px;font-weight:500}
+.tf{font-size:10px;color:var(--faint);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot{color:var(--faint);font-size:11px;margin:10px 4px}
+.pname{font-size:26px;font-weight:800}.curve path{fill:none;stroke:var(--neon);stroke-width:2}.curve{border:1px solid var(--stroke);border-radius:8px}
+.seg{display:flex;background:rgba(255,255,255,.06);border-radius:10px;padding:3px}.seg button{flex:1;font:inherit;color:var(--dim);background:none;border:0;padding:7px;border-radius:8px}.seg .on{background:rgba(255,255,255,.14);color:#fff}
+.chart canvas{width:100%;height:110px;display:block}
+.set{padding:10px 0;border-top:1px solid rgba(255,255,255,.06)}.set:first-of-type{border-top:0}.set.changed{background:linear-gradient(90deg,rgba(0,184,255,.08),transparent);margin:0 -14px;padding:10px 14px}
+.set label{display:flex;justify-content:space-between;align-items:center;gap:10px}.in{display:flex;align-items:center;gap:5px}.in small{color:var(--dim);min-width:30px}
+input[type=number]{font:inherit;font-variant-numeric:tabular-nums;color:#fff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:8px;width:110px;text-align:right}
+.sheet input[type=number]{width:100%;text-align:left;margin-top:4px}.sheet label{display:block;margin:8px 0;font-size:13px;color:var(--dim)}
+input[type=range]{width:100%;accent-color:var(--neon)}
+.chk{display:flex!important;align-items:center;gap:8px;margin:10px 0;color:#fff!important}.chk input{width:20px;height:20px;accent-color:var(--neon)}.chk.big{font-size:16px;font-weight:600}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:14px}.kv span{color:var(--dim)}.kv b{font-weight:500;word-break:break-all}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}.dot.green{background:var(--green);box-shadow:0 0 6px var(--green)}.dot.amber{background:var(--amber)}.dot.red{background:var(--red)}.dot.grey{background:var(--faint)}
+.console{font-family:ui-monospace,Menlo,monospace;font-size:11px;max-height:260px;overflow:auto;line-height:1.5;word-break:break-all}
+.chg{padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06)}.issue{font-size:13px;padding:6px 8px;border-radius:8px;margin:4px 0}.issue.blocked{background:rgba(255,59,79,.18);color:#ff8d99}.issue.warning{background:rgba(255,176,33,.15);color:var(--amber)}
+#tabs{position:fixed;bottom:0;left:0;right:0;display:flex;background:#050608;border-top:1px solid rgba(255,255,255,.08);padding-bottom:env(safe-area-inset-bottom);z-index:6}
+.tab{flex:1;background:none;border:0;color:var(--faint);font:inherit;font-size:10px;padding:8px 0 6px;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.tab.on{color:var(--neon)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:10;display:flex;align-items:flex-end;justify-content:center}#modal[hidden]{display:none}
+.sheet{background:#0d1219;border:1px solid var(--stroke);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:88vh;display:flex;flex-direction:column;padding:16px 16px calc(14px + env(safe-area-inset-bottom))}
+.sheet .body{overflow:auto;flex:1}.actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;padding-top:12px}
+.spinner{width:34px;height:34px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--neon);border-radius:50%;margin:16px auto;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+ul{padding-left:18px}
+</style></head>
+<body><div id="demo" hidden>DEMO MODE — SIMULATED DATA, NOT YOUR SCOOTER</div><div id="alerts"></div>
+<main id="view"></main><nav id="tabs"></nav><div id="modal" hidden></div>
+<script>(() => {
+'use strict';
+const C = (() => {
+// GENERATED from VESC firmware confgenerator.c (vedderb/bldc, GPL-3.0); verified byte-exact against the compiled firmware serializer.
+const LAYOUT_DATA = {"names":["pwm_mode","comm_mode","motor_type","sensor_mode","l_current_max","l_current_min","l_in_current_max","l_in_current_min","l_in_current_map_start","l_in_current_map_filter","l_abs_current_max","l_min_erpm","l_max_erpm","l_erpm_abs_overspeed","l_erpm_start","l_max_erpm_fbrake","l_max_erpm_fbrake_cc","l_min_vin","l_max_vin","l_battery_cut_start","l_battery_cut_end","l_battery_regen_cut_start","l_battery_regen_cut_end","l_slow_abs_current","l_temp_fet_start","l_temp_fet_end","l_temp_motor_start","l_temp_motor_end","l_temp_accel_dec","l_min_duty","l_max_duty","l_watt_max","l_watt_min","l_current_max_scale","l_current_min_scale","l_in_current_max_scale","l_in_current_min_scale","l_duty_start","l_additional_faults","sl_min_erpm","sl_min_erpm_cycle_int_limit","sl_max_fullbreak_current_dir_change","sl_cycle_int_limit","sl_phase_advance_at_br","sl_cycle_int_rpm_br","sl_bemf_coupling_k","hall_table[0]","hall_table[1]","hall_table[2]","hall_table[3]","hall_table[4]","hall_table[5]","hall_table[6]","hall_table[7]","hall_sl_erpm","foc_current_kp","foc_current_ki","foc_f_zv","foc_dt_us","foc_encoder_inverted","foc_encoder_offset","foc_encoder_ratio","foc_sensor_mode","foc_pll_kp","foc_pll_ki","foc_motor_l","foc_motor_ld_lq_diff","foc_motor_r","foc_motor_flux_linkage","foc_observer_gain","foc_observer_gain_slow","foc_observer_offset","foc_duty_dowmramp_kp","foc_duty_dowmramp_ki","foc_start_curr_dec","foc_start_curr_dec_rpm","foc_openloop_rpm","foc_openloop_rpm_low","foc_sl_openloop_hyst","foc_sl_openloop_time_lock","foc_sl_openloop_time_ramp","foc_sl_openloop_time","foc_sl_openloop_boost_q","foc_sl_openloop_max_q","foc_hall_table[0]","foc_hall_table[1]","foc_hall_table[2]","foc_hall_table[3]","foc_hall_table[4]","foc_hall_table[5]","foc_hall_table[6]","foc_hall_table[7]","foc_hall_interp_erpm","foc_sl_erpm_start","foc_sl_erpm","foc_control_sample_mode","foc_current_sample_mode","foc_sat_comp_mode","foc_sat_comp","foc_temp_comp","foc_temp_comp_base_temp","foc_current_filter_const","foc_cc_decoupling","foc_observer_type","foc_hfi_amb_mode","foc_hfi_amb_current","foc_hfi_amb_tres","foc_hfi_voltage_start","foc_hfi_voltage_run","foc_hfi_voltage_max","foc_hfi_gain","foc_hfi_max_err","foc_hfi_hyst","foc_sl_erpm_hfi","foc_hfi_reset_erpm","foc_hfi_start_samples","foc_hfi_obs_ovr_sec","foc_hfi_samples","foc_offsets_cal_mode","foc_offsets_current[0]","foc_offsets_current[1]","foc_offsets_current[2]","foc_offsets_voltage[0]","foc_offsets_voltage[1]","foc_offsets_voltage[2]","foc_offsets_voltage_undriven[0]","foc_offsets_voltage_undriven[1]","foc_offsets_voltage_undriven[2]","foc_phase_filter_enable","foc_phase_filter_disable_fault","foc_phase_filter_max_erpm","foc_mtpa_mode","foc_fw_current_max","foc_fw_duty_start","foc_fw_ramp_time","foc_fw_q_current_factor","foc_fw_backoff","foc_speed_soure","foc_short_ls_on_zero_duty","foc_overmod_factor","foc_mag_vd_max","sp_pid_loop_rate","s_pid_kp","s_pid_ki","s_pid_kd","s_pid_kd_filter","s_pid_min_erpm","s_pid_allow_braking","s_pid_ramp_erpms_s","s_pid_speed_source","p_pid_kp","p_pid_ki","p_pid_kd","p_pid_kd_proc","p_pid_kd_filter","p_pid_ang_div","p_pid_gain_dec_angle","p_pid_offset","cc_startup_boost_duty","cc_min_current","cc_gain","cc_ramp_step_max","m_fault_stop_time_ms","m_duty_ramp_step","m_current_backoff_gain","m_encoder_counts","m_encoder_sin_amp","m_encoder_cos_amp","m_encoder_sin_offset","m_encoder_cos_offset","m_encoder_sincos_filter_constant","m_encoder_sincos_phase_correction","m_sensor_port_mode","m_invert_direction","m_drv8301_oc_mode","m_drv8301_oc_adj","m_bldc_f_sw_min","m_bldc_f_sw_max","m_dc_f_sw","m_ntc_motor_beta","m_out_aux_mode","m_motor_temp_sens_type","m_ptc_motor_coeff","m_ntcx_ptcx_res","m_ntcx_ptcx_temp_base","m_hall_extra_samples","m_batt_filter_const","si_motor_poles","si_gear_ratio","si_wheel_diameter","si_battery_type","si_battery_cells","si_battery_ah","si_motor_nl_current","bms.type","bms.limit_mode","bms.t_limit_start","bms.t_limit_end","bms.soc_limit_start","bms.soc_limit_end","bms.vmin_limit_start","bms.vmin_limit_end","bms.vmax_limit_start","bms.vmax_limit_end","bms.fwd_can_mode","foc_d_gain_scale_start","foc_d_gain_scale_max_mod","foc_offsets_cal_on_boot","foc_sample_v0_v7","foc_sample_high_current","gpd_buffer_notify_left","gpd_buffer_interpol","gpd_current_filter_const","gpd_current_kp","gpd_current_ki","foc_encoder_sin_gain","foc_encoder_cos_gain","foc_encoder_sin_offset","foc_encoder_cos_offset","foc_encoder_sincos_filter_constant","foc_f_sw","foc_sl_d_current_duty","foc_sl_d_current_factor","controller_id","timeout_msec","timeout_brake_current","can_status_rate_1","can_status_rate_2","can_status_msgs_r1","can_status_msgs_r2","can_baud_rate","pairing_done","permanent_uart_enabled","shutdown_mode","can_mode","uavcan_esc_index","uavcan_raw_mode","uavcan_raw_rpm_max","uavcan_status_current_mode","servo_out_enable","kill_sw_mode","app_to_use","app_ppm_conf.ctrl_type","app_ppm_conf.pid_max_erpm","app_ppm_conf.hyst","app_ppm_conf.pulse_start","app_ppm_conf.pulse_end","app_ppm_conf.pulse_center","app_ppm_conf.median_filter","app_ppm_conf.safe_start","app_ppm_conf.throttle_exp","app_ppm_conf.throttle_exp_brake","app_ppm_conf.throttle_exp_mode","app_ppm_conf.ramp_time_pos","app_ppm_conf.ramp_time_neg","app_ppm_conf.multi_esc","app_ppm_conf.tc","app_ppm_conf.tc_max_diff","app_ppm_conf.max_erpm_for_dir","app_ppm_conf.smart_rev_max_duty","app_ppm_conf.smart_rev_ramp_time","app_adc_conf.ctrl_type","app_adc_conf.hyst","app_adc_conf.voltage_start","app_adc_conf.voltage_end","app_adc_conf.voltage_min","app_adc_conf.voltage_max","app_adc_conf.voltage_center","app_adc_conf.voltage2_start","app_adc_conf.voltage2_end","app_adc_conf.use_filter","app_adc_conf.safe_start","app_adc_conf.buttons","app_adc_conf.voltage_inverted","app_adc_conf.voltage2_inverted","app_adc_conf.throttle_exp","app_adc_conf.throttle_exp_brake","app_adc_conf.throttle_exp_mode","app_adc_conf.ramp_time_pos","app_adc_conf.ramp_time_neg","app_adc_conf.multi_esc","app_adc_conf.tc","app_adc_conf.tc_max_diff","app_adc_conf.update_rate_hz","app_adc_conf.coast_brake_level","app_adc_conf.coast_brake_ramp_time","app_uart_baudrate","app_chuk_conf.ctrl_type","app_chuk_conf.hyst","app_chuk_conf.ramp_time_pos","app_chuk_conf.ramp_time_neg","app_chuk_conf.stick_erpm_per_s_in_cc","app_chuk_conf.throttle_exp","app_chuk_conf.throttle_exp_brake","app_chuk_conf.throttle_exp_mode","app_chuk_conf.multi_esc","app_chuk_conf.tc","app_chuk_conf.tc_max_diff","app_chuk_conf.use_smart_rev","app_chuk_conf.smart_rev_max_duty","app_chuk_conf.smart_rev_ramp_time","app_chuk_conf.coast_brake_level","app_chuk_conf.coast_brake_ramp_time","app_nrf_conf.speed","app_nrf_conf.power","app_nrf_conf.crc_type","app_nrf_conf.retry_delay","app_nrf_conf.retries","app_nrf_conf.channel","app_nrf_conf.address[0]","app_nrf_conf.address[1]","app_nrf_conf.address[2]","app_nrf_conf.send_crc_ack","app_pas_conf.ctrl_type","app_pas_conf.sensor_type","app_pas_conf.current_scaling","app_pas_conf.pedal_rpm_start","app_pas_conf.pedal_rpm_end","app_pas_conf.invert_pedal_direction","app_pas_conf.magnets","app_pas_conf.use_filter","app_pas_conf.ramp_time_pos","app_pas_conf.ramp_time_neg","app_pas_conf.update_rate_hz","imu_conf.type","imu_conf.mode","imu_conf.filter","imu_conf.accel_lowpass_filter_x","imu_conf.accel_lowpass_filter_y","imu_conf.accel_lowpass_filter_z","imu_conf.gyro_lowpass_filter","imu_conf.sample_rate_hz","imu_conf.use_magnetometer","imu_conf.accel_confidence_decay","imu_conf.mahony_kp","imu_conf.mahony_ki","imu_conf.madgwick_beta","imu_conf.rot_roll","imu_conf.rot_pitch","imu_conf.rot_yaw","imu_conf.accel_offsets[0]","imu_conf.accel_offsets[1]","imu_conf.accel_offsets[2]","imu_conf.gyro_offsets[0]","imu_conf.gyro_offsets[1]","imu_conf.gyro_offsets[2]","app_balance_conf.pid_mode","app_balance_conf.kp","app_balance_conf.ki","app_balance_conf.kd","app_balance_conf.kp2","app_balance_conf.ki2","app_balance_conf.kd2","app_balance_conf.hertz","app_balance_conf.loop_time_filter","app_balance_conf.fault_pitch","app_balance_conf.fault_roll","app_balance_conf.fault_duty","app_balance_conf.fault_adc1","app_balance_conf.fault_adc2","app_balance_conf.fault_delay_pitch","app_balance_conf.fault_delay_roll","app_balance_conf.fault_delay_duty","app_balance_conf.fault_delay_switch_half","app_balance_conf.fault_delay_switch_full","app_balance_conf.fault_adc_half_erpm","app_balance_conf.fault_is_dual_switch","app_balance_conf.tiltback_duty_angle","app_balance_conf.tiltback_duty_speed","app_balance_conf.tiltback_duty","app_balance_conf.tiltback_hv_angle","app_balance_conf.tiltback_hv_speed","app_balance_conf.tiltback_hv","app_balance_conf.tiltback_lv_angle","app_balance_conf.tiltback_lv_speed","app_balance_conf.tiltback_lv","app_balance_conf.tiltback_return_speed","app_balance_conf.tiltback_constant","app_balance_conf.tiltback_constant_erpm","app_balance_conf.tiltback_variable","app_balance_conf.tiltback_variable_max","app_balance_conf.noseangling_speed","app_balance_conf.startup_pitch_tolerance","app_balance_conf.startup_roll_tolerance","app_balance_conf.startup_speed","app_balance_conf.deadzone","app_balance_conf.multi_esc","app_balance_conf.yaw_kp","app_balance_conf.yaw_ki","app_balance_conf.yaw_kd","app_balance_conf.roll_steer_kp","app_balance_conf.roll_steer_erpm_kp","app_balance_conf.brake_current","app_balance_conf.brake_timeout","app_balance_conf.yaw_current_clamp","app_balance_conf.ki_limit","app_balance_conf.kd_pt1_lowpass_frequency","app_balance_conf.kd_pt1_highpass_frequency","app_balance_conf.booster_angle","app_balance_conf.booster_ramp","app_balance_conf.booster_current","app_balance_conf.torquetilt_start_current","app_balance_conf.torquetilt_angle_limit","app_balance_conf.torquetilt_on_speed","app_balance_conf.torquetilt_off_speed","app_balance_conf.torquetilt_strength","app_balance_conf.torquetilt_filter","app_balance_conf.turntilt_strength","app_balance_conf.turntilt_angle_limit","app_balance_conf.turntilt_start_angle","app_balance_conf.turntilt_start_erpm","app_balance_conf.turntilt_speed","app_balance_conf.turntilt_erpm_boost","app_balance_conf.turntilt_erpm_boost_end","send_can_status","send_can_status_rate_hz","app_adc_conf.cc_button_inverted","app_adc_conf.rev_button_inverted","app_balance_conf.kd_biquad_lowpass","app_balance_conf.kd_biquad_highpass","app_balance_conf.tiltback_angle","app_balance_conf.tiltback_speed","app_balance_conf.tiltback_high_voltage","app_balance_conf.tiltback_low_voltage","app_balance_conf.current_boost","app_balance_conf.setpoint_pitch_filter","app_balance_conf.setpoint_target_filter","app_balance_conf.setpoint_filter_clamp","app_balance_conf.kd_pt1_frequency","imu_conf.gyro_offset_comp_fact[0]","imu_conf.gyro_offset_comp_fact[1]","imu_conf.gyro_offset_comp_fact[2]","imu_conf.gyro_offset_comp_clamp","app_balance_conf.pitch_fault","app_balance_conf.roll_fault","app_balance_conf.adc1","app_balance_conf.adc2","app_balance_conf.overspeed_duty","app_balance_conf.overspeed_delay","app_balance_conf.fault_delay","app_balance_conf.adc_half_fault_erpm","app_balance_conf.setpoint_clamp"],"mcconf":{"471314414":{"fw":["7.01"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 8f10000 9f10000 10h 11h 12h 13h 14f10000 15f0.1 16f0.1 17f10 18f10 19f10 20f10 21f10 22f10 23a 24a 25a 26a 27a 28f10000 29f10000 30f10000 31h 32h 33f10000 34f10000 35f10000 36f10000 37f10000 38a 39h 40h 41h 42f10 43f10000 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 57h 58h 59a 60h 61h 62a 63h 64h 65h 66h 67h 68h 69h 70h 71f1000 72h 73h 74f10000 75h 76h 77f1000 78f100 79f100 80f100 81f100 82f100 83f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 93h 94h 95a 96a 97a 98f1000 99a 100f100 101f10000 102a 103a 104a 105f10 106a 107f10 108f10 109f10 110f1000 111f1000 112f100 113h 114h 115b 116h 117a 118a 119h 120h 121h 122f10000 123f10000 124f10000 125f10000 126f10000 127f10000 128a 129a 130h 131a 132h 133f10000 134f1000 135f10000 136f1000 137a 138a 139f10000 140f10000 141a 142h 143h 144h 145f10000 146h 147a 148h 149a 150h 151h 152h 153h 154f10000 155h 156f10 157h 158f10000 159h 160h 161f10000 162e 163f10000 164h 165d 166f1000 167f1000 168f1000 169f1000 170f1000 171f1000 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 183f0.1 184f10 185a 186a 187a 188h 189h 190a 191a 192h 193h 194a 195a 196a 197a 198f1000 199f1000 200f1000 201f1000 202f1000 203f1000 204a"},"1470992211":{"fw":["7.00"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 8f10000 9f10000 10h 11h 12h 14f10000 15h 16h 17f10 18f10 19f10 20f10 21f10 22f10 23a 24a 25a 26a 27a 28f10000 29f10000 30f10000 31h 32h 33f10000 34f10000 37f10000 38a 39h 40h 41h 42f10 43f10000 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 57h 58h 59a 60h 61h 62a 63h 64h 65h 66h 67h 68h 69h 70h 71f1000 72h 73h 74f10000 75h 76h 77f1000 78f100 79f100 80f100 81f100 82f100 83f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 93h 94h 95a 96a 97a 98f1000 99a 100f100 101f10000 102a 103a 104a 105f10 106a 107f10 108f10 109f10 110f1000 111f1000 112f100 113h 114h 115b 116h 117a 118a 119h 120h 121h 122f10000 123f10000 124f10000 125f10000 126f10000 127f10000 128a 129a 130h 131a 132h 133f10000 134f1000 135f10000 136f1000 137a 138a 139f10000 140f10000 141a 142h 143h 144h 145f10000 146h 147a 148h 149a 150h 151h 152h 153h 154f10000 155h 156f10 157h 158f10000 159h 160h 161f10000 162e 163f10000 164h 165d 166f1000 167f1000 168f1000 169f1000 170f1000 171f1000 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 183f0.1 184f10 185a 186a 187a 188h 189h 190a 191a 192h 193h 194a 195a 196a 197a 198f1000 199f1000 200f1000 201f1000 202f1000 203f1000 204a"},"788332866":{"fw":["6.06"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 8f10000 9f10000 10h 11h 12h 14f10000 15h 16h 17f10 18f10 19f10 20f10 21f10 22f10 23a 24a 25a 26a 27a 28f10000 29f10000 30f10000 31h 32h 33f10000 34f10000 37f10000 39h 40h 41h 42f10 43f10000 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 57h 58h 59a 60h 61h 62a 63h 64h 65h 66h 67h 68h 69h 70h 71f1000 72h 73h 74f10000 75h 76h 77f1000 205f1000 206f1000 78f100 79f100 80f100 81f100 82f100 83f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 93h 94h 95a 96a 97a 98f1000 99a 100f100 101f10000 102a 103a 104a 105f10 106a 107f10 108f10 109f10 110f1000 111f1000 112f100 113h 115b 116h 117a 118a 119h 120h 121h 122f10000 123f10000 124f10000 125f10000 126f10000 127f10000 128a 129a 130h 131a 132h 133f10000 134f1000 135f10000 137a 138a 139f10000 141a 142h 143h 144h 145f10000 146h 147a 148h 149a 150h 151h 152h 153h 154f10000 155h 156f10 157h 158f10000 159h 160h 161f10000 162e 163f10000 164h 165d 166f1000 167f1000 168f1000 169f1000 170f1000 171f1000 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 183f0.1 184f10 185a 186a 187a 188h 189h 190a 191a 192h 193h 194a 195a 196a 197a 198f1000 199f1000 200f1000 201f1000 202f1000 203f1000 204a"},"1065524471":{"fw":["6.05"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 8f10000 9f10000 10h 11h 12h 14f10000 15h 16h 17f10 18f10 19f10 20f10 21f10 22f10 23a 24a 25a 26a 27a 28f10000 29f10000 30f10000 31h 32h 33f10000 34f10000 37f10000 39h 40h 41h 42f10 43f10000 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 57h 58h 59a 60h 61h 62a 63h 64h 65h 66h 67h 68h 69h 70h 71f1000 72h 73h 74f10000 75h 76h 77f1000 205f1000 206f1000 78f100 79f100 80f100 81f100 82f100 83f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 93h 94h 95a 96a 97a 98f1000 99a 100f100 101f10000 102a 103a 107f10 108f10 109f10 110f1000 111f1000 112f100 113h 115b 116h 117a 207a 119h 120h 121h 122f10000 123f10000 124f10000 125f10000 126f10000 127f10000 128a 129a 130h 131a 132h 133f10000 134f1000 135f10000 137a 138a 141a 142h 143h 144h 145f10000 146h 147a 148h 149a 150h 151h 152h 153h 154f10000 155h 156f10 157h 158f10000 159h 160h 161f10000 162e 163f10000 164h 165d 166f1000 167f1000 168f1000 169f1000 170f1000 171f1000 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 183f0.1 184f10 185a 186a 187a 188h 189h 190a 191a 192h 193h 194a 195a 196a 197a 198f1000 199f1000 200f1000 201f1000 202f1000 203f1000 204a"},"776184161":{"fw":["6.00","6.02"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 10h 11h 12h 14f10000 15h 16h 17h 18h 19h 20h 23a 24f10 25f10 26f10 27f10 28f10000 29f10000 30f10000 31h 32h 33f10000 34f10000 37f10000 39h 40h 41h 42f10 43f10000 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 57h 58h 59a 60h 61h 62a 63h 64h 65h 66h 67h 68h 69h 70h 71f1000 72h 73h 74f10000 75h 76h 77f1000 205f1000 206f1000 78f100 79f100 80f100 81f100 82f100 83f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 94h 208a 209a 97a 98f1000 99a 100f100 101f10000 102a 103a 107f10 108f10 109f10 110f1000 112f100 113h 115b 116h 117a 207a 119h 120h 121h 122f10000 123f10000 124f10000 125f10000 126f10000 127f10000 128a 129a 130h 131a 132h 133f10000 134f1000 135f10000 137a 210c 211c 212f10000 213h 214h 141a 142h 143h 144h 145f10000 146h 147a 148h 150h 151h 152h 153h 154f10000 155h 156f10 157h 158f10000 159h 160h 161f10000 162e 163f10000 164h 165d 166f1000 167f1000 168f1000 169f1000 170f1000 171f1000 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 183f0.1 184f10 185a 186a 187a 188h 189h 190a 191a 192h 193h 194a 195a 196f100 197f100 198f1000 199f1000 204a"},"2525666056":{"fw":["5.03"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 10h 11h 12h 14f10000 15h 16h 17h 18h 19h 20h 23a 24f10 25f10 26f10 27f10 28f10000 29f10000 30f10000 31h 32h 33f10000 34f10000 37f10000 39h 40h 41h 42f10 43f10000 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 57h 58h 59a 60h 61h 215h 216h 217h 218h 219h 62a 63h 64h 65h 66h 67h 68h 69h 70h 71f1000 72h 73h 76h 77f1000 205h 206h 78f100 79f100 80f100 81f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 94h 208a 209a 98f1000 99a 100f100 101f10000 102a 103a 107h 108h 109h 113h 115b 116h 117a 207a 119h 120h 121h 122f10000 123f10000 124f10000 125f10000 126f10000 127f10000 128a 130h 131a 132h 133f10000 134f1000 135f10000 210c 211c 212f10000 213h 214h 141a 142h 143h 144h 145f10000 146h 147a 148h 150h 151h 152h 153h 154h 155h 156f10 157h 158h 159h 160h 161h 162e 163h 164h 165d 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 185a 187a 188h 189h 190a 191a 192h 193h 194a 196f100 197f100 198f1000 199f1000 204a"},"2211848314":{"fw":["5.02"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 10h 11h 12h 14h 15h 16h 17h 18h 19h 20h 23a 24h 25h 26h 27h 28h 29h 30h 31h 32h 33h 34h 37h 39h 40h 41h 42h 43h 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 220h 58h 59a 60h 61h 215h 216h 217h 218h 219h 62a 63h 64h 65h 66h 67h 68h 69h 70h 72h 73h 76h 77f1000 205h 206h 78f100 79f100 80f100 81f100 84a 85a 86a 87a 88a 89a 90a 91a 92h 94h 208a 209a 98f1000 99a 100f100 101h 102a 103a 107h 108h 109h 113h 115b 116h 117a 210c 211c 212h 213h 214h 142h 143h 144h 145h 146h 147a 148h 150h 151h 152h 154h 155h 158h 159h 160h 161h 162e 163h 164h 165d 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 185a 187a 188h 189h 190a 191a 192h 194a 196f100 197f100 198f1000 199f1000"},"3698540221":{"fw":["5.01"],"f":"0a 1a 2a 3a 4h 5h 6h 7h 10h 11h 12h 14h 15h 16h 17h 18h 19h 20h 23a 24h 25h 26h 27h 28h 29h 30h 31h 32h 33h 34h 37h 39h 40h 41h 42h 43h 44h 45h 46a 47a 48a 49a 50a 51a 52a 53a 54h 55h 56h 220h 58h 59a 60h 61h 215h 216h 217h 218h 219h 62a 63h 64h 65h 67h 68h 69h 70h 72h 73h 76h 78h 81h 221h 222h 84a 85a 86a 87a 88a 89a 90a 91a 94h 208a 209a 98h 99a 100h 101h 102a 103a 107h 108h 109h 113h 115b 116h 117a 210c 211c 212h 213h 214h 142h 143h 144h 145h 146h 147a 150h 151h 152h 154h 155h 158h 159h 160h 161h 162e 163h 164h 165d 172a 173a 174a 175a 176h 177h 178h 179h 180a 181a 182h 187a 188h 189h 190a 191a 192h"}},"appconf":{"2802465283":{"fw":["7.01"],"f":"223a 224d 225h 226b 227b 228a 229a 230a 231a 232a 233a 234a 235a 236a 237h 238a 239a 240a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258f1 259h 260h 261a 262h 263f1000 264f1000 265f1000 266f1000 267f1000 268f1000 269f1000 270a 271a 272a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 284f1000 285h 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 301f1000 302h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 313a 314a 315f1000 316f10 317f10 318a 319b 320a 321f100 322f100 323b 324a 325a 326a 327f1 328f1 329f1 330f1 331b 332a 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h"},"2384027283":{"fw":["7.00"],"f":"223a 224d 225h 226b 227b 228a 229a 230a 231a 232a 233a 234a 235a 236a 237h 238a 239a 240a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258f1 259h 260h 261a 262h 263f1000 264f1000 265f1000 266f1000 267f1000 268f1000 269f1000 270a 271a 272a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 301f1000 302h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 313a 314a 315f1000 316f10 317f10 318a 319b 320a 321f100 322f100 323b 324a 325a 326a 327f1 328f1 329f1 330f1 331b 332a 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h"},"2099347128":{"fw":["6.05","6.06"],"f":"223a 224d 225h 226b 227b 228a 229a 230a 231a 232a 233a 234a 235a 236a 237h 238a 239a 240a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258f1 259h 260h 261a 262h 263f1000 264f1000 265f1000 266f1000 267f1000 268f1000 269f1000 270a 271a 272a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 313a 314a 315f1000 316f10 317f10 318a 319b 320a 321f100 322f100 323b 324a 325a 326a 327f1 328f1 329f1 330f1 331b 332a 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h"},"486554156":{"fw":["6.00","6.02"],"f":"223a 224d 225h 226b 227b 228a 229a 230a 231a 232a 233a 234a 235a 236a 237h 238a 239a 240a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258f1 259h 260h 261a 262h 263f1000 264f1000 265f1000 266f1000 267f1000 268f1000 269f1000 270a 271a 272a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 346a 347h 348h 349h 350h 351h 352h 353b 354b 355h 356h 357h 358h 359h 360b 361b 362b 363b 364b 365b 366a 367f100 368f100 369f1000 370f100 371f100 372h 373f100 374f100 375h 376f100 377h 378b 379h 380h 381f100 382h 383h 384h 385h 386a 387h 388h 389h 390h 391h 392h 393b 394h 395h 396b 397b 398h 399h 400h 401h 402h 403h 404h 405h 406h 407h 408h 409h 410b 411h 412b 413b 313a 314a 315f1000 316f10 317f10 318a 319b 320a 321f100 322f100 323b 324a 325a 326a 327f1 328f1 329f1 330f1 331b 332a 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h"},"3733512279":{"fw":["5.03"],"f":"223a 224d 225h 414a 415b 230a 231a 232a 233a 234a 235a 236a 237h 239a 240a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258f1 259h 260h 261a 262h 263h 264h 267h 268h 269h 270a 271a 416a 417a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 347h 348h 349h 353b 354b 355h 356h 357h 358h 359h 360b 361b 362b 363b 364b 365b 367f100 368f100 369f1000 370f100 371f100 372h 373f100 374f100 375h 376f100 377h 378b 379h 380h 381f100 382h 383h 384h 385h 386a 387h 388h 389h 390h 391h 392h 393b 394h 396b 397b 418h 419h 398h 399h 400h 401h 402h 403h 404h 405h 406h 407h 408h 409h 410b 411h 412b 413b 313a 314a 315f1000 316f10 317f10 318a 319b 320a 321f100 322f100 323b 324a 325a 331b 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h"},"3264926020":{"fw":["5.02"],"f":"223a 224d 225h 414a 415b 230a 231a 232a 233a 234a 235a 236a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258h 259h 260h 261a 262h 263h 264h 267h 268h 269h 270a 271a 416a 417a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 347h 348h 349h 353b 355h 356h 357h 358h 359h 360b 361b 362b 363b 364b 365b 420h 421h 369h 422h 423h 377h 378b 382h 383h 384h 385h 424h 386a 387h 388h 389h 390h 391h 392h 394h 425h 426h 427h 428b 313a 314a 315f1000 316f10 317f10 318a 319b 320a 321f100 322f100 323b 324a 325a 331b 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h 429h 430h 431h 432h"},"2460147246":{"fw":["5.01"],"f":"223a 224d 225h 414a 415b 230a 231a 232a 233a 234a 235a 241a 242a 243h 244h 245h 246h 247h 248a 249a 250h 251h 252a 253h 254h 255a 256a 257h 258h 259h 260h 261a 262h 263h 264h 267h 268h 269h 270a 271a 416a 417a 273a 274a 275h 276h 277a 278h 279h 280a 281a 282h 283b 286d 287a 288h 289h 290h 291h 292h 293h 294a 295a 296a 297h 298a 299h 300h 303a 304a 305a 306a 307a 308a 309a 310a 311a 312a 347h 348h 349h 353b 433h 434h 435h 436h 437h 369h 420h 421h 422h 423h 382h 383h 384h 385h 424h 386a 387h 388h 389h 390h 392h 438b 439b 377h 391h 394h 440b 425h 426h 441h 324a 325a 331b 333h 334h 335h 336h 337h 338h 339h 340h 341h 342h 343h 344h 345h 429h 430h 431h 432h"}}};
+
+// VESCDash core: VESC protocol, telemetry decoding, config layouts, validation, profiles.
+// Ported from the VESCCore Swift package. Wire formats follow the VESC firmware
+// (vedderb/bldc comm/commands.c, comm/packet.c, util/buffer.c, util/crc.c).
+
+// ---------- CRC + framing ----------
+const CRC_TABLE = (() => {
+  const t = new Uint16Array(256);
+  for (let i = 0; i < 256; i++) {
+    let c = i << 8;
+    for (let j = 0; j < 8; j++) c = (c & 0x8000) ? ((c << 1) ^ 0x1021) & 0xffff : (c << 1) & 0xffff;
+    t[i] = c;
+  }
+  return t;
+})();
+
+function crc16(data) {
+  let crc = 0;
+  for (let i = 0; i < data.length; i++) crc = (CRC_TABLE[((crc >> 8) ^ data[i]) & 0xff] ^ (crc << 8)) & 0xffff;
+  return crc;
+}
+
+const MAX_PAYLOAD = 512; // firmware PACKET_MAX_PL_LEN
+
+function encodePacket(payload) {
+  const n = payload.length;
+  if (n === 0) throw new Error('empty packet');
+  const head = n <= 255 ? [2, n] : n <= 65535 ? [3, n >> 8, n & 0xff] : [4, (n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff];
+  const c = crc16(payload);
+  return Uint8Array.from([...head, ...payload, c >> 8, c & 0xff, 3]);
+}
+
+class PacketDecoder {
+  constructor(maxPayload = MAX_PAYLOAD) {
+    this.maxPayload = maxPayload; this.buf = []; this.resyncing = false;
+    this.crcErrors = 0; this.framingErrors = 0; this.packets = 0;
+  }
+  reset() { this.buf = []; this.resyncing = false; }
+  probe(s) {
+    const b = this.buf, f = b[s];
+    if (f !== 2 && f !== 3 && f !== 4) return { t: 'inv' };
+    const h = f;
+    if (b.length - s < h) return { t: 'inc' };
+    let len = 0;
+    for (let i = 1; i < h; i++) len = len * 256 + b[s + i];
+    if (len === 0 || len > this.maxPayload) return { t: 'inv' };
+    const total = h + len + 3;
+    if (b.length - s < total) return { t: 'inc' };
+    const p0 = s + h, pl = b.slice(p0, p0 + len);
+    const crc = (b[p0 + len] << 8) | b[p0 + len + 1];
+    if (b[p0 + len + 2] !== 3 || crc !== crc16(pl)) return { t: 'inv' };
+    return { t: 'pkt', pl, total };
+  }
+  feed(bytes) {
+    for (const x of bytes) this.buf.push(x);
+    const out = [];
+    while (this.buf.length) {
+      const r = this.probe(0);
+      if (r.t === 'pkt') { out.push(Uint8Array.from(r.pl)); this.packets++; this.buf.splice(0, r.total); this.resyncing = false; }
+      else if (r.t === 'inv') {
+        const f = this.buf[0];
+        if (f === 2 || f === 3 || f === 4) this.crcErrors++; else this.framingErrors++;
+        this.buf.shift(); this.resyncing = true;
+      } else {
+        if (!this.resyncing) break;
+        let found = -1;
+        for (let i = 1; i < this.buf.length; i++) if (this.probe(i).t === 'pkt') { found = i; break; }
+        if (found < 0) break;
+        this.framingErrors++; this.buf.splice(0, found);
+      }
+    }
+    return out;
+  }
+}
+
+// ---------- byte codec ----------
+const f32buf = new DataView(new ArrayBuffer(4));
+
+function f32autoBits(v) {
+  if (!isFinite(v)) throw new Error('non-finite float');
+  const f = Math.fround(v);
+  if (Math.abs(f) < 1.5e-38) return 0;
+  f32buf.setFloat32(0, f); // for normal numbers float32_auto == IEEE-754 single
+  return f32buf.getUint32(0);
+}
+
+function f32autoValue(res) {
+  let e = (res >>> 23) & 0xff; const sigI = res & 0x7fffff; const neg = (res >>> 31) === 1;
+  let sig = 0;
+  if (e !== 0 || sigI !== 0) { sig = sigI / (8388608 * 2) + 0.5; e -= 126; }
+  if (neg) sig = -sig;
+  return Math.fround(sig * Math.pow(2, e));
+}
+
+class Writer {
+  constructor() { this.b = []; }
+  u8(v) { this.b.push(v & 0xff); return this; }
+  u16(v) { this.b.push((v >> 8) & 0xff, v & 0xff); return this; }
+  i16(v) { return this.u16(v & 0xffff); }
+  u32(v) { this.b.push((v >>> 24) & 0xff, (v >>> 16) & 0xff, (v >>> 8) & 0xff, v & 0xff); return this; }
+  i32(v) { return this.u32(v >>> 0); }
+  f16(v, scale) {
+    const s = Math.round(v * scale);
+    if (!isFinite(s) || s < -32768 || s > 32767) throw new Error(`${v} does not fit a 16-bit field (scale ${scale})`);
+    return this.i16(s);
+  }
+  f32(v, scale) {
+    const s = Math.round(v * scale);
+    if (!isFinite(s) || s < -2147483648 || s > 2147483647) throw new Error(`${v} does not fit a 32-bit field`);
+    return this.i32(s);
+  }
+  f32auto(v) { return this.u32(f32autoBits(v)); }
+  bytes() { return Uint8Array.from(this.b); }
+}
+
+class Reader {
+  constructor(b, i = 0) { this.b = b; this.i = i; }
+  get remaining() { return this.b.length - this.i; }
+  need(n) { if (this.remaining < n) throw new Error(`payload truncated (need ${n}, have ${this.remaining})`); }
+  u8() { this.need(1); return this.b[this.i++]; }
+  u16() { this.need(2); const v = (this.b[this.i] << 8) | this.b[this.i + 1]; this.i += 2; return v; }
+  i16() { const v = this.u16(); return v >= 0x8000 ? v - 0x10000 : v; }
+  u32() { this.need(4); const b = this.b, i = this.i; this.i += 4; return ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0; }
+  i32() { return this.u32() | 0; }
+  f16(s) { return this.i16() / s; }
+  f32(s) { return this.i32() / s; }
+  f32auto() { return f32autoValue(this.u32()); }
+  cstr() { let s = ''; for (;;) { const c = this.u8(); if (c === 0) break; s += String.fromCharCode(c); } return s; }
+  raw(n) { this.need(n); const r = this.b.slice(this.i, this.i + n); this.i += n; return r; }
+}
+
+const hex = (b) => Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+const unhex = (h) => Uint8Array.from(h.match(/../g) || [], (x) => parseInt(x, 16));
+
+// ---------- commands ----------
+const CMD = {
+  FW_VERSION: 0, GET_VALUES: 4, SET_MCCONF: 13, GET_MCCONF: 14, SET_APPCONF: 16, GET_APPCONF: 17,
+  PRINT: 21, GET_DECODED_PPM: 31, GET_DECODED_ADC: 32, SET_MCCONF_TEMP: 48,
+  GET_VALUES_SETUP_SELECTIVE: 51, GET_MCCONF_TEMP: 91, SET_APPCONF_NO_STORE: 149,
+};
+
+const FAULTS = ['NONE', 'OVER_VOLTAGE', 'UNDER_VOLTAGE', 'DRV', 'ABS_OVER_CURRENT', 'OVER_TEMP_FET', 'OVER_TEMP_MOTOR',
+  'GATE_DRIVER_OVER_VOLTAGE', 'GATE_DRIVER_UNDER_VOLTAGE', 'MCU_UNDER_VOLTAGE', 'BOOTING_FROM_WATCHDOG_RESET', 'ENCODER_SPI',
+  'ENCODER_SINCOS_BELOW_MIN_AMPLITUDE', 'ENCODER_SINCOS_ABOVE_MAX_AMPLITUDE', 'FLASH_CORRUPTION', 'HIGH_OFFSET_CURRENT_SENSOR_1',
+  'HIGH_OFFSET_CURRENT_SENSOR_2', 'HIGH_OFFSET_CURRENT_SENSOR_3', 'UNBALANCED_CURRENTS', 'BRK', 'RESOLVER_LOT', 'RESOLVER_DOS',
+  'RESOLVER_LOS', 'FLASH_CORRUPTION_APP_CFG', 'FLASH_CORRUPTION_MC_CFG', 'ENCODER_NO_MAGNET', 'ENCODER_MAGNET_TOO_STRONG',
+  'PHASE_FILTER', 'ENCODER_FAULT', 'LV_OUTPUT_FAULT'];
+const faultName = (c) => FAULTS[c] || `UNKNOWN_FAULT_${c}`;
+function faultHelp(c) {
+  switch (c) {
+    case 0: return 'No fault.';
+    case 1: return 'Input voltage above the configured maximum. Check regen limits.';
+    case 2: return 'Input voltage below the configured minimum. Battery empty or sagging.';
+    case 3: return 'Gate driver fault. Stop riding and inspect the controller.';
+    case 4: return 'Absolute over-current. Wiring, motor detection or current limits may be wrong.';
+    case 5: return 'MOSFET over-temperature. Let the controller cool down.';
+    case 6: return 'Motor over-temperature. Let the motor cool down.';
+    case 10: return 'Controller rebooted from a watchdog reset.';
+    case 14: case 23: case 24: return 'Flash/configuration corruption. Restore a backup with VESC Tool.';
+    case 15: case 16: case 17: return 'Current sensor offset too high. Re-run calibration in VESC Tool.';
+    default: return 'See VESC documentation for this fault code.';
+  }
+}
+
+function expectCmd(p, id) { if (!p.length || p[0] !== id) throw new Error(`unexpected reply ${p[0]} (expected ${id})`); }
+
+function decodeFirmware(p) {
+  expectCmd(p, CMD.FW_VERSION);
+  const r = new Reader(p, 1);
+  const fw = { major: r.u8(), minor: r.u8() };
+  fw.hw = r.cstr();
+  fw.uuid = r.remaining >= 12 ? hex(r.raw(12)) : '';
+  if (r.remaining >= 1) fw.paired = r.u8() !== 0;
+  if (r.remaining >= 1) fw.testVersion = r.u8();
+  fw.version = `${fw.major}.${String(fw.minor).padStart(2, '0')}`;
+  fw.versionNumber = fw.major * 100 + fw.minor;
+  return fw;
+}
+
+function decodeValues(p) {
+  expectCmd(p, CMD.GET_VALUES);
+  const r = new Reader(p, 1);
+  const v = {
+    tempMosfet: r.f16(10), tempMotor: r.f16(10), motorCurrent: r.f32(100), inputCurrent: r.f32(100),
+    id: r.f32(100), iq: r.f32(100), duty: r.f16(1000), erpm: r.f32(1), voltage: r.f16(10),
+    ah: r.f32(1e4), ahCharged: r.f32(1e4), wh: r.f32(1e4), whCharged: r.f32(1e4),
+    tacho: r.i32(), tachoAbs: r.i32(), fault: r.u8(),
+  };
+  if (r.remaining >= 4) v.pidPos = r.f32(1e6);
+  if (r.remaining >= 1) v.controllerId = r.u8();
+  if (r.remaining >= 6) v.tempMosfets = [r.f16(10), r.f16(10), r.f16(10)];
+  if (r.remaining >= 8) { v.vd = r.f32(1e3); v.vq = r.f32(1e3); }
+  if (r.remaining >= 1) v.status = r.u8();
+  return v;
+}
+
+const ODO_REQUEST = Uint8Array.from([CMD.GET_VALUES_SETUP_SELECTIVE, 0x00, 0x10, 0x00, 0x00]);
+function decodeOdometer(p) {
+  expectCmd(p, CMD.GET_VALUES_SETUP_SELECTIVE);
+  const r = new Reader(p, 1);
+  const mask = r.u32();
+  if (!(mask & (1 << 20)) || r.remaining < 4) return null;
+  return r.u32();
+}
+
+function decodeThrottle(p) {
+  if (p[0] !== CMD.GET_DECODED_ADC && p[0] !== CMD.GET_DECODED_PPM) throw new Error('unexpected reply');
+  const r = new Reader(p, 1);
+  return { level: r.f32(1e6), raw: r.f32(1e6) };
+}
+
+const TEMP_KEYS = ['currentMinScale', 'currentMaxScale', 'minERPM', 'maxERPM', 'minDuty', 'maxDuty', 'wattMin', 'wattMax'];
+function decodeTempLimits(p) {
+  expectCmd(p, CMD.GET_MCCONF_TEMP);
+  const r = new Reader(p, 1), t = {};
+  for (const k of TEMP_KEYS) t[k] = r.f32auto();
+  if (r.remaining >= 8) { t.inCurrentMin = r.f32auto(); t.inCurrentMax = r.f32auto(); }
+  if (r.remaining >= 9) { t.poles = r.u8(); t.gearRatio = r.f32auto(); t.wheelDiameter = r.f32auto(); }
+  return t;
+}
+
+/** COMM_SET_MCCONF_TEMP with store = 0 (never written to flash), ack = 1. */
+function encodeTempLimits(t) {
+  const w = new Writer().u8(CMD.SET_MCCONF_TEMP).u8(0).u8(0).u8(1).u8(0);
+  for (const k of TEMP_KEYS) w.f32auto(t[k]);
+  if (t.inCurrentMin != null && t.inCurrentMax != null) w.f32auto(t.inCurrentMin).f32auto(t.inCurrentMax);
+  return w.bytes();
+}
+
+function tempLimitsEqual(a, b) {
+  const eq = (x, y) => Math.abs(x - y) <= Math.max(1e-4, Math.abs(x) * 1e-5);
+  for (const k of TEMP_KEYS) if (!eq(a[k], b[k])) return false;
+  for (const k of ['inCurrentMin', 'inCurrentMax']) {
+    if ((a[k] == null) !== (b[k] == null)) return false;
+    if (a[k] != null && !eq(a[k], b[k])) return false;
+  }
+  return true;
+}
+
+// ---------- configuration layouts ----------
+
+const TYPE = { a: ['u8', 1], b: ['u16', 2], c: ['i16', 2], d: ['u32', 4], e: ['i32', 4], f: ['f16', 2], g: ['f32s', 4], h: ['f32', 4] };
+const layoutCache = {};
+function getLayout(kind, sig) {
+  const key = kind + sig;
+  if (key in layoutCache) return layoutCache[key];
+  const d = LAYOUT_DATA[kind][String(sig)];
+  if (!d) return (layoutCache[key] = null);
+  const fields = []; const map = {}; let off = 4;
+  for (const tok of d.f.split(' ')) {
+    const m = tok.match(/^(\d+)([a-h])(.*)$/);
+    const [type, size] = TYPE[m[2]];
+    const f = { name: LAYOUT_DATA.names[+m[1]], type, size, scale: m[3] ? parseFloat(m[3]) : 1, off };
+    fields.push(f); map[f.name] = f; off += size;
+  }
+  return (layoutCache[key] = { kind, sig, fw: d.fw, fields, map, size: off });
+}
+const supportedFirmware = () => [...new Set(Object.values(LAYOUT_DATA.mcconf).flatMap((x) => x.fw))].sort();
+
+class ConfigBlob {
+  /** bytes = config blob without command id (starts with 32-bit signature). */
+  constructor(kind, bytes) {
+    if (bytes.length < 4) throw new Error('configuration too short');
+    const sig = new Reader(bytes).u32();
+    const layout = getLayout(kind, sig);
+    if (!layout) throw new Error(`unknown configuration signature ${sig} — this firmware build is not in the verified layout table`);
+    if (bytes.length !== layout.size) throw new Error(`configuration length mismatch (layout ${layout.size}, got ${bytes.length})`);
+    this.kind = kind; this.layout = layout; this.bytes = Uint8Array.from(bytes);
+  }
+  static fromReply(kind, p) {
+    expectCmd(p, kind === 'mcconf' ? CMD.GET_MCCONF : CMD.GET_APPCONF);
+    return new ConfigBlob(kind, p.slice(1));
+  }
+  get sig() { return this.layout.sig; }
+  clone() { return new ConfigBlob(this.kind, this.bytes); }
+  has(n) { return n in this.layout.map; }
+  get(n) {
+    const f = this.layout.map[n]; if (!f) return null;
+    const r = new Reader(this.bytes, f.off);
+    switch (f.type) {
+      case 'u8': return r.u8(); case 'u16': return r.u16(); case 'i16': return r.i16();
+      case 'u32': return r.u32(); case 'i32': return r.i32();
+      case 'f16': return r.f16(f.scale); case 'f32s': return r.f32(f.scale); case 'f32': return r.f32auto();
+    }
+  }
+  set(n, v) {
+    const f = this.layout.map[n]; if (!f) throw new Error(`field ${n} does not exist in this firmware`);
+    if (!isFinite(v)) throw new Error(`invalid value for ${n}`);
+    const w = new Writer(); const iv = Math.round(v);
+    const range = (lo, hi) => { if (iv < lo || iv > hi) throw new Error(`${v} out of range for ${n}`); };
+    switch (f.type) {
+      case 'u8': range(0, 255); w.u8(iv); break;
+      case 'u16': range(0, 65535); w.u16(iv); break;
+      case 'i16': range(-32768, 32767); w.i16(iv); break;
+      case 'u32': range(0, 4294967295); w.u32(iv); break;
+      case 'i32': range(-2147483648, 2147483647); w.i32(iv); break;
+      case 'f16': w.f16(v, f.scale); break;
+      case 'f32s': w.f32(v, f.scale); break;
+      case 'f32': w.f32auto(v); break;
+    }
+    this.bytes.set(w.bytes(), f.off);
+  }
+  equals(o) { return o && o.kind === this.kind && hex(o.bytes) === hex(this.bytes); }
+  changes(orig) {
+    if (!orig || orig.sig !== this.sig) return [];
+    const out = [];
+    for (const f of this.layout.fields) {
+      for (let i = f.off; i < f.off + f.size; i++) {
+        if (this.bytes[i] !== orig.bytes[i]) { out.push({ name: f.name, old: orig.get(f.name), new: this.get(f.name) }); break; }
+      }
+    }
+    return out;
+  }
+  writePayload(cmd) { return Uint8Array.from([cmd, ...this.bytes]); }
+}
+
+// ---------- vehicle, battery, trip ----------
+function speedKmh(erpm, g) {
+  if (!geometryValid(g)) return 0;
+  return erpm / g.polePairs / g.gearRatio * Math.PI * g.wheelDiameter * 60 / 1000;
+}
+function erpmForKmh(kmh, g) {
+  if (!geometryValid(g)) return 0;
+  return kmh * 1000 / 60 / (Math.PI * g.wheelDiameter) * g.gearRatio * g.polePairs;
+}
+const geometryValid = (g) => g && g.wheelDiameter > 0.05 && g.wheelDiameter < 2 && g.polePairs > 0 && g.polePairs < 100 && g.gearRatio > 0;
+const tachoMeters = (steps, g) => geometryValid(g) ? steps / (g.polePairs * 6) / g.gearRatio * Math.PI * g.wheelDiameter : 0;
+
+const CELL_CURVE = [[3.0, 0], [3.3, 5], [3.45, 10], [3.55, 20], [3.62, 30], [3.68, 40], [3.74, 50], [3.8, 60], [3.87, 70], [3.95, 80], [4.05, 90], [4.2, 100]];
+function batteryPercent(v, b) {
+  if (!(b.full > b.empty)) return 0;
+  const t = Math.min(Math.max((v - b.empty) / (b.full - b.empty), 0), 1);
+  const cell = 3.0 + t * 1.2;
+  for (let i = 1; i < CELL_CURVE.length; i++) {
+    const [v1, p1] = CELL_CURVE[i], [v0, p0] = CELL_CURVE[i - 1];
+    if (cell <= v1) return p0 + (cell - v0) / (v1 - v0) * (p1 - p0);
+  }
+  return 100;
+}
+const nominalWh = (b) => b.cells * 3.6 * b.capacityAh;
+
+class Trip {
+  constructor() { this.reset(); }
+  reset() { this.meters = 0; this.wh = 0; this.whRegen = 0; this.maxKmh = 0; this.last = null; }
+  breakContinuity() { this.last = null; }
+  ingest(v, g) {
+    if (this.last) {
+      const d = v.tachoAbs - this.last.tachoAbs;
+      if (d > 0) { const m = tachoMeters(d, g); if (m < 1000) this.meters += m; }
+      const dw = v.wh - this.last.wh; if (dw >= 0 && dw < 100) this.wh += dw;
+      const dr = v.whCharged - this.last.whCharged; if (dr >= 0 && dr < 100) this.whRegen += dr;
+    }
+    this.last = { tachoAbs: v.tachoAbs, wh: v.wh, whCharged: v.whCharged };
+    this.maxKmh = Math.max(this.maxKmh, Math.abs(speedKmh(v.erpm, g)));
+  }
+  get km() { return this.meters / 1000; }
+  get netWh() { return this.wh - this.whRegen; }
+  get whPerKm() { return this.km >= 0.3 && this.netWh > 0 ? this.netWh / this.km : null; }
+}
+
+// ---------- settings catalog + validation ----------
+const ADC_APPS = [2, 5, 10], PPM_APPS = [1, 4];
+const SETTINGS = [
+  ['mcconf', 'l_current_max', 'Motor current max', 'A', 'Current limits', 1, 1, 'Maximum motor (phase) current. Sets torque; more heat in motor and controller.'],
+  ['mcconf', 'l_current_min', 'Motor current brake', 'A', 'Current limits', 1, 1, 'Maximum braking motor current (negative).'],
+  ['mcconf', 'l_in_current_max', 'Battery current max', 'A', 'Current limits', 1, 1, 'Maximum current drawn from the battery. Must not exceed the battery rating.'],
+  ['mcconf', 'l_in_current_min', 'Battery regen current', 'A', 'Current limits', 1, 1, 'Maximum current pushed back into the battery when braking (negative).'],
+  ['mcconf', 'l_max_erpm', 'Max ERPM (forward)', 'ERPM', 'Speed limits', 1, 100, 'Electrical RPM limit forward.'],
+  ['mcconf', 'l_min_erpm', 'Max ERPM (reverse)', 'ERPM', 'Speed limits', 1, 100, 'Electrical RPM limit in reverse (negative).'],
+  ['appconf', 'app_adc_conf.hyst', 'Throttle deadband', '%', 'Throttle', 100, 1, 'Deadband around zero throttle.', ADC_APPS],
+  ['appconf', 'app_adc_conf.throttle_exp', 'Throttle expo', '', 'Throttle', 1, 0.05, 'Negative = gentler at low throttle.', ADC_APPS],
+  ['appconf', 'app_adc_conf.ramp_time_pos', 'Positive ramping', 's', 'Throttle', 1, 0.05, 'Seconds from 0 to full throttle.', ADC_APPS],
+  ['appconf', 'app_adc_conf.ramp_time_neg', 'Negative ramping', 's', 'Throttle', 1, 0.05, 'Seconds to ramp down.', ADC_APPS],
+  ['appconf', 'app_ppm_conf.hyst', 'Throttle deadband', '%', 'Throttle', 100, 1, 'Deadband around center.', PPM_APPS],
+  ['appconf', 'app_ppm_conf.throttle_exp', 'Throttle expo', '', 'Throttle', 1, 0.05, 'Negative = gentler at low throttle.', PPM_APPS],
+  ['appconf', 'app_ppm_conf.ramp_time_pos', 'Positive ramping', 's', 'Throttle', 1, 0.05, 'Seconds from 0 to full throttle.', PPM_APPS],
+  ['appconf', 'app_ppm_conf.ramp_time_neg', 'Negative ramping', 's', 'Throttle', 1, 0.05, 'Seconds to ramp down.', PPM_APPS],
+  ['mcconf', 'foc_fw_current_max', 'Field weakening current', 'A', 'Field weakening', 1, 1, '0 = off. Lets the motor exceed its natural top speed; a fault at speed can cause dangerous overvoltage.'],
+  ['mcconf', 'foc_fw_duty_start', 'Field weakening duty start', '%', 'Field weakening', 100, 1, 'Duty cycle where field weakening begins.'],
+  ['mcconf', 'l_temp_fet_start', 'MOSFET temp limit start', '°C', 'Temperature protection', 1, 1, 'Current reduction starts here.'],
+  ['mcconf', 'l_temp_fet_end', 'MOSFET temp cutoff', '°C', 'Temperature protection', 1, 1, 'Output reaches zero here.'],
+  ['mcconf', 'l_temp_motor_start', 'Motor temp limit start', '°C', 'Temperature protection', 1, 1, 'Needs a motor temperature sensor.'],
+  ['mcconf', 'l_temp_motor_end', 'Motor temp cutoff', '°C', 'Temperature protection', 1, 1, 'Motor output reaches zero here.'],
+].map(([kind, field, title, unit, group, factor, step, help, apps]) => ({ kind, field, title, unit, group, factor, step, help, apps }));
+
+function supportedSettings(mc, app) {
+  const a = app && app.has('app_to_use') ? app.get('app_to_use') : null;
+  return SETTINGS.filter((d) => {
+    const b = d.kind === 'mcconf' ? mc : app;
+    if (!b || !b.has(d.field)) return false;
+    if (d.apps && a != null) return d.apps.includes(a);
+    return !d.apps || a == null;
+  });
+}
+
+const DEFAULT_HW = { controller: 'Flipsky FSESC 75/200 Pro', maxVoltage: 75, maxMotorCurrent: 200, battMaxDischarge: 55, battMaxCharge: 10, maxFetCutoff: 100, maxMotorCutoff: 140, maxFwFraction: 0.5, maxSpeedKmh: 90 };
+
+const INCREASE_UP = ['l_current_max', 'l_in_current_max', 'l_max_erpm', 'foc_fw_current_max', 'l_temp_fet_start', 'l_temp_fet_end', 'l_temp_motor_start', 'l_temp_motor_end'];
+const INCREASE_DOWN = ['l_current_min', 'l_in_current_min', 'l_min_erpm'];
+const fmt = (x) => (Math.abs(x) >= 100 || x === Math.round(x)) ? x.toFixed(0) : x.toFixed(2);
+
+/** Returns [{field, severity: 'blocked'|'warning', message}]. */
+function validate(orig, edited, hw, g) {
+  const issues = []; const add = (field, severity, message) => issues.push({ field, severity, message });
+  if (orig.sig !== edited.sig) { add('signature', 'blocked', 'Configuration layout changed.'); return issues; }
+  const changes = edited.changes(orig); const changed = new Set(changes.map((c) => c.name));
+  const allowed = new Set(SETTINGS.filter((s) => s.kind === edited.kind).map((s) => s.field));
+  const v = (n) => edited.get(n);
+  for (const c of changes) {
+    if (!allowed.has(c.name)) { add(c.name, 'blocked', `${c.name} is not an app-editable setting.`); continue; }
+    if ((c.new > c.old && INCREASE_UP.includes(c.name)) || (c.new < c.old && INCREASE_DOWN.includes(c.name)))
+      add(c.name, 'warning', `This INCREASES a protection/power limit (${fmt(c.old)} → ${fmt(c.new)}).`);
+  }
+  if (edited.kind === 'mcconf') {
+    if (changed.has('l_current_max')) {
+      const x = v('l_current_max');
+      if (x <= 0) add('l_current_max', 'blocked', 'Motor current max must be positive.');
+      if (x > hw.maxMotorCurrent) add('l_current_max', 'blocked', `Exceeds controller limit of ${hw.maxMotorCurrent} A.`);
+      else if (x > hw.maxMotorCurrent * 0.75) add('l_current_max', 'warning', 'Above 75 % of the controller rating — expect high heat.');
+    }
+    if (changed.has('l_current_min')) {
+      const x = v('l_current_min');
+      if (x > 0) add('l_current_min', 'blocked', 'Brake current must be zero or negative.');
+      if (-x > hw.maxMotorCurrent) add('l_current_min', 'blocked', `Exceeds controller limit of ${hw.maxMotorCurrent} A.`);
+    }
+    if (changed.has('l_in_current_max')) {
+      const x = v('l_in_current_max');
+      if (x <= 0) add('l_in_current_max', 'blocked', 'Battery current max must be positive.');
+      if (x > hw.battMaxDischarge) add('l_in_current_max', 'blocked', `Exceeds your battery discharge rating of ${hw.battMaxDischarge} A.`);
+    }
+    if (changed.has('l_in_current_min')) {
+      const x = v('l_in_current_min');
+      if (x > 0) add('l_in_current_min', 'blocked', 'Regen current must be zero or negative.');
+      if (-x > hw.battMaxCharge) add('l_in_current_min', 'blocked', `Exceeds your battery charge rating of ${hw.battMaxCharge} A.`);
+    }
+    if (changed.has('l_max_erpm')) {
+      const x = v('l_max_erpm');
+      if (x <= 0) add('l_max_erpm', 'blocked', 'Forward ERPM limit must be positive.');
+      if (geometryValid(g)) {
+        const k = speedKmh(x, g);
+        if (k > hw.maxSpeedKmh) add('l_max_erpm', 'blocked', `≈ ${fmt(k)} km/h — above the absolute limit of ${hw.maxSpeedKmh} km/h.`);
+        else if (k > 60) add('l_max_erpm', 'warning', `≈ ${fmt(k)} km/h. Check local laws, brakes and tyres.`);
+      } else add('l_max_erpm', 'blocked', 'Set up wheel size and pole pairs first.');
+    }
+    if (changed.has('l_min_erpm') && v('l_min_erpm') > 0) add('l_min_erpm', 'blocked', 'Reverse ERPM limit must be zero or negative.');
+    if (changed.has('foc_fw_current_max')) {
+      const x = v('foc_fw_current_max'), cap = (v('l_current_max') || 0) * hw.maxFwFraction;
+      if (x < 0) add('foc_fw_current_max', 'blocked', 'Cannot be negative.');
+      if (x > cap) add('foc_fw_current_max', 'blocked', `Above ${Math.round(hw.maxFwFraction * 100)} % of motor current max (${fmt(cap)} A).`);
+      else if (x > 0) add('foc_fw_current_max', 'warning', 'Field weakening enabled: a fault at high speed can cause dangerous overvoltage. Test at low speed first.');
+    }
+    if (changed.has('foc_fw_duty_start')) { const x = v('foc_fw_duty_start'); if (x < 0.5 || x > 0.99) add('foc_fw_duty_start', 'blocked', 'Must be between 50 % and 99 %.'); }
+    for (const [s, e, max, label] of [['l_temp_fet_start', 'l_temp_fet_end', hw.maxFetCutoff, 'MOSFET'], ['l_temp_motor_start', 'l_temp_motor_end', hw.maxMotorCutoff, 'Motor']]) {
+      if (!changed.has(s) && !changed.has(e)) continue;
+      const a = v(s), b = v(e);
+      if (a >= b) add(e, 'blocked', `${label} cutoff must be higher than the limit start.`);
+      if (b > max) add(e, 'blocked', `${label} cutoff above the allowed ${max} °C.`);
+      if (a < 20) add(s, 'blocked', `${label} limit start below 20 °C would throttle constantly.`);
+    }
+  } else {
+    for (const p of ['app_adc_conf', 'app_ppm_conf']) {
+      if (changed.has(`${p}.hyst`)) { const x = v(`${p}.hyst`); if (x < 0 || x > 0.5) add(`${p}.hyst`, 'blocked', 'Deadband must be 0–50 %.'); else if (x < 0.02) add(`${p}.hyst`, 'warning', 'Very small deadband: throttle noise may move the scooter.'); }
+      if (changed.has(`${p}.throttle_exp`) && Math.abs(v(`${p}.throttle_exp`)) > 5) add(`${p}.throttle_exp`, 'blocked', 'Expo must be between -5 and 5.');
+      for (const r of ['ramp_time_pos', 'ramp_time_neg']) {
+        if (!changed.has(`${p}.${r}`)) continue;
+        const x = v(`${p}.${r}`);
+        if (x < 0 || x > 5) add(`${p}.${r}`, 'blocked', 'Ramp time must be 0–5 s.');
+        else if (r === 'ramp_time_pos' && x < 0.1) add(`${p}.${r}`, 'warning', 'Ramp under 0.1 s gives very abrupt acceleration.');
+      }
+    }
+  }
+  return issues.sort((a, b) => (a.severity === 'blocked' ? 0 : 1) - (b.severity === 'blocked' ? 0 : 1));
+}
+
+// ---------- profiles ----------
+const THROTTLE_PRESETS = { smooth: { ramp: 0.6, expo: -1.0 }, medium: { ramp: 0.3, expo: -0.4 }, direct: { ramp: 0.15, expo: 0 } };
+const DEFAULT_PROFILES = [
+  { kind: 'eco', name: 'ECO', speed: 25, power: 1000, ramp: 0.6, expo: -1.0, applyThrottle: true },
+  { kind: 'sport', name: 'SPORT', speed: 60, power: 2000, ramp: 0.3, expo: -0.4, applyThrottle: true },
+  { kind: 'boost', name: 'BOOST', speed: 70, power: 3000, ramp: 0.15, expo: 0, applyThrottle: true },
+];
+function throttleCurve(x, expo) { x = Math.min(Math.max(Math.abs(x), 0), 1); return expo >= 0 ? 1 - Math.pow(1 - x, 1 + expo) : Math.pow(x, 1 - expo); }
+const throttlePrefix = (app) => app == null ? null : ADC_APPS.includes(app) ? 'app_adc_conf' : PPM_APPS.includes(app) ? 'app_ppm_conf' : null;
+
+/**
+ * Plan a profile from the baseline (controller's normal limits). Only max ERPM and max power
+ * are lowered; every other limit is copied from the baseline unchanged. Never raises anything.
+ */
+function planProfile(profile, baseline, current, g, caps, baseApp) {
+  if (!caps.tempLimits) throw new Error('This controller did not answer COMM_GET_MCCONF_TEMP; profiles are not supported.');
+  if (!geometryValid(g)) throw new Error('Set and confirm wheel size and pole pairs first (Setup tab).');
+  if (!(profile.speed >= 5 && profile.speed <= 200)) throw new Error('Speed target must be 5–200 km/h.');
+  if (!(profile.power >= 100)) throw new Error('Power target must be at least 100 W.');
+  const notes = []; const limits = { ...baseline };
+  const want = erpmForKmh(profile.speed, g);
+  if (want >= baseline.maxERPM) { limits.maxERPM = baseline.maxERPM; notes.push(`Speed capped at the controller's configured max ERPM (≈ ${fmt(speedKmh(baseline.maxERPM, g))} km/h). The app never raises it.`); }
+  else limits.maxERPM = want;
+  if (profile.power >= baseline.wattMax) { limits.wattMax = baseline.wattMax; notes.push(`Power capped at the controller's configured ${fmt(baseline.wattMax)} W.`); }
+  else limits.wattMax = profile.power;
+  notes.push(`Real power is also limited by battery current max${baseline.inCurrentMax != null ? ` (${fmt(baseline.inCurrentMax)} A)` : ''} and motor current max.`);
+  const changes = [];
+  if (Math.abs(limits.maxERPM - current.maxERPM) >= 1)
+    changes.push({ setting: 'Max ERPM (temporary)', from: `${fmt(current.maxERPM)} (≈${fmt(speedKmh(current.maxERPM, g))} km/h)`, to: `${fmt(limits.maxERPM)} (≈${fmt(speedKmh(limits.maxERPM, g))} km/h)` });
+  if (Math.abs(limits.wattMax - current.wattMax) >= 0.5)
+    changes.push({ setting: 'Max power (temporary)', from: `${fmt(current.wattMax)} W`, to: `${fmt(limits.wattMax)} W` });
+  for (const [label, k] of [['Motor current scale', 'currentMaxScale'], ['Brake current scale', 'currentMinScale'], ['Reverse ERPM', 'minERPM'], ['Max duty', 'maxDuty'], ['Min duty', 'minDuty'], ['Regen power', 'wattMin'], ['Battery current max', 'inCurrentMax'], ['Battery regen current', 'inCurrentMin']]) {
+    if (current[k] != null && limits[k] != null && Math.abs(current[k] - limits[k]) > 1e-3)
+      changes.push({ setting: label, from: fmt(current[k]), to: fmt(limits[k]), note: 'restored to baseline' });
+  }
+  let app = null;
+  if (profile.applyThrottle) {
+    const p = caps.throttlePrefix;
+    if (baseApp && p && caps.fwNumber >= 600 && baseApp.has(`${p}.ramp_time_pos`) && baseApp.has(`${p}.throttle_exp`)) {
+      app = baseApp.clone();
+      app.set(`${p}.ramp_time_pos`, Math.min(Math.max(profile.ramp, 0.05), 3));
+      app.set(`${p}.throttle_exp`, Math.min(Math.max(profile.expo, -5), 5));
+      for (const c of app.changes(baseApp)) changes.push({ setting: c.name.replace(`${p}.`, 'Throttle ') + ' (temporary)', from: fmt(c.old), to: fmt(c.new) });
+    } else {
+      notes.push('Throttle response not changed: ' + (caps.fwNumber < 600 ? 'needs firmware 6.00+.' : !p ? 'controller is not using the ADC or PPM throttle app.' : 'app configuration not readable with a verified layout.'));
+    }
+  }
+  notes.push('Changes are temporary (not saved to flash) and clear when the controller is powered off.');
+  return { profile, limits, app, changes, notes, speed: speedKmh(limits.maxERPM, g), power: limits.wattMax };
+}
+
+function stationaryCheck(v, age, throttle, throttleActive) {
+  const f = [];
+  if (!v) return { ok: false, failures: ['No live telemetry from the controller.'] };
+  if (age > 1) f.push(`Telemetry is stale (${age.toFixed(1)} s).`);
+  if (Math.abs(v.erpm) > 50) f.push(`Wheel is turning (${Math.round(v.erpm)} ERPM). Stop the scooter.`);
+  if (Math.abs(v.motorCurrent) > 1) f.push(`Motor current ${v.motorCurrent.toFixed(1)} A. Release the throttle.`);
+  if (Math.abs(v.duty) > 0.02) f.push(`Motor is being driven (duty ${Math.round(v.duty * 100)} %).`);
+  if (v.fault) f.push(`Controller fault ${faultName(v.fault)}.`);
+  if (throttleActive) {
+    if (!throttle) f.push('Could not read the throttle position.');
+    else if (Math.abs(throttle.level) > 0.05) f.push(`Throttle is not released (${Math.round(throttle.level * 100)} %).`);
+  }
+  return { ok: f.length === 0, failures: f };
+}
+
+// ---------- alerts + CSV ----------
+function thresholdsFrom(mc) {
+  const t = { fetStart: 85, fetEnd: 100, motorStart: 85, motorEnd: 100, motorSensor: false };
+  if (!mc) return t;
+  const fs = mc.get('l_temp_fet_start'), fe = mc.get('l_temp_fet_end'), ms = mc.get('l_temp_motor_start'), me = mc.get('l_temp_motor_end');
+  if (fs > 0 && fe > fs) { t.fetStart = fs; t.fetEnd = fe; }
+  if (ms > 0 && me > ms) { t.motorStart = ms; t.motorEnd = me; }
+  if (mc.has('m_motor_temp_sens_type')) t.motorSensor = mc.get('m_motor_temp_sens_type') !== 8; // 8 = disabled (fw 6+)
+  return t;
+}
+
+function evaluateAlerts(v, pct, bat, t) {
+  const a = [];
+  if (v.tempMosfet >= t.fetStart) a.push({ kind: 'fet', level: 'critical', title: 'Controller overheating', detail: `MOSFETs ${Math.round(v.tempMosfet)} °C — power reduced (cutoff ${t.fetEnd} °C).` });
+  else if (v.tempMosfet >= t.fetStart - 10) a.push({ kind: 'fet', level: 'caution', title: 'Controller hot', detail: `MOSFETs ${Math.round(v.tempMosfet)} °C, limiting from ${t.fetStart} °C.` });
+  if (t.motorSensor && v.tempMotor > -40 && v.tempMotor < 250) {
+    if (v.tempMotor >= t.motorStart) a.push({ kind: 'motor', level: 'critical', title: 'Motor overheating', detail: `Motor ${Math.round(v.tempMotor)} °C — power reduced (cutoff ${t.motorEnd} °C).` });
+    else if (v.tempMotor >= t.motorStart - 10) a.push({ kind: 'motor', level: 'caution', title: 'Motor hot', detail: `Motor ${Math.round(v.tempMotor)} °C, limiting from ${t.motorStart} °C.` });
+  }
+  if (pct <= bat.critical) a.push({ kind: 'battery', level: 'critical', title: 'Battery critically low', detail: `${v.voltage.toFixed(1)} V (≈${Math.round(pct)} %). Stop soon.` });
+  else if (pct <= bat.low) a.push({ kind: 'battery', level: 'caution', title: 'Battery low', detail: `${v.voltage.toFixed(1)} V (≈${Math.round(pct)} %).` });
+  if (v.fault) a.push({ kind: 'fault', level: 'critical', title: `Controller fault: ${faultName(v.fault)}`, detail: faultHelp(v.fault) });
+  if (v.status != null && (v.status & 2)) a.push({ kind: 'kill', level: 'caution', title: 'Kill switch active', detail: 'Controller output is disabled.' });
+  return a.sort((x, y) => (x.level === 'critical' ? 0 : 1) - (y.level === 'critical' ? 0 : 1));
+}
+
+const CSV_HEADER = 'timestamp_iso8601,elapsed_s,speed_kmh,erpm,voltage_v,battery_current_a,motor_current_a,power_w,duty_pct,temp_controller_c,temp_motor_c,trip_km,fault';
+function renderCSV(samples) {
+  const t0 = samples.length ? samples[0].t : 0;
+  return [CSV_HEADER, ...samples.map((s) => [new Date(s.t).toISOString(), ((s.t - t0) / 1000).toFixed(2), s.speed.toFixed(2), s.erpm.toFixed(0), s.voltage.toFixed(2),
+    s.batteryCurrent.toFixed(2), s.motorCurrent.toFixed(2), s.watts.toFixed(1), (s.duty * 100).toFixed(1), s.tempMosfet.toFixed(1),
+    s.tempMotor == null ? '' : s.tempMotor.toFixed(1), s.tripKm.toFixed(3), faultName(s.fault)].join(','))].join('\n') + '\n';
+}
+
+return { crc16, MAX_PAYLOAD, encodePacket, PacketDecoder, f32autoBits, f32autoValue, Writer, Reader, hex, unhex, CMD, FAULTS, faultName, faultHelp, decodeFirmware, decodeValues, ODO_REQUEST, decodeOdometer, decodeThrottle, decodeTempLimits, encodeTempLimits, tempLimitsEqual, getLayout, supportedFirmware, ConfigBlob, speedKmh, erpmForKmh, geometryValid, tachoMeters, batteryPercent, nominalWh, Trip, ADC_APPS, SETTINGS, supportedSettings, DEFAULT_HW, validate, THROTTLE_PRESETS, DEFAULT_PROFILES, throttleCurve, throttlePrefix, planProfile, stationaryCheck, thresholdsFrom, evaluateAlerts, CSV_HEADER, renderCSV };
+})();
+// VESCDash web app: Web Bluetooth transport, demo simulator, session logic and UI.
+
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const show = (v, d = 0) => (v == null || !isFinite(v)) ? '—' : Number(v).toFixed(d);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// ---------------- storage ----------------
+const store = {
+  get(k, def) { try { const v = localStorage.getItem('vescdash.' + k); return v ? JSON.parse(v) : def; } catch { return def; } },
+  set(k, v) { try { localStorage.setItem('vescdash.' + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
+};
+
+const DEFAULT_SETTINGS = {
+  geometry: { wheelDiameter: 0.254, polePairs: 15, gearRatio: 1 }, geometryConfirmed: false,
+  battery: { cells: 16, full: 67.2, empty: 48.0, capacityAh: 25, low: 20, critical: 10 },
+  hw: { ...C.DEFAULT_HW }, hwConfirmed: false,
+  profiles: C.DEFAULT_PROFILES.map((p) => ({ ...p })),
+  readOnly: true, autoReconnect: true, pollHz: 10, vibrate: true,
+};
+const S = Object.assign(structuredClone(DEFAULT_SETTINGS), store.get('settings', {}));
+const saveSettings = () => store.set('settings', S);
+const baselines = store.get('baselines', {});
+const saveBaselines = () => store.set('baselines', baselines);
+let backups = store.get('backups', []);
+const saveBackups = () => store.set('backups', backups.slice(0, 40));
+
+// ---------------- app state ----------------
+const st = {
+  tab: 'dash', source: 'none', linkState: 'Not connected', handshake: '', ready: false,
+  fw: null, mc: null, app: null, mcErr: null, appErr: null, temp: null, tempOK: false,
+  activeProfile: null, tempUnknown: false, profileStatus: '',
+  v: null, vAt: 0, odo: null, odoSupported: null, trip: new C.Trip(), history: [],
+  alerts: [], connLost: false, timeouts: 0, faults: [], lastFault: 0,
+  recording: false, recStart: 0, rec: [], console: [], traffic: false, busy: false,
+  editMc: null, editApp: null, uart: null,
+};
+const geo = () => S.geometry;
+const pct = () => st.v ? C.batteryPercent(st.v.voltage, S.battery) : null;
+const thresholds = () => C.thresholdsFrom(st.mc);
+const motorSensor = () => st.v && thresholds().motorSensor && st.v.tempMotor > -40 && st.v.tempMotor < 250;
+const appToUse = () => st.app && st.app.has('app_to_use') ? st.app.get('app_to_use') : null;
+const caps = () => ({ tempLimits: st.tempOK, fwNumber: st.fw ? st.fw.versionNumber : 0, throttlePrefix: C.throttlePrefix(appToUse()) });
+const uuid = () => st.fw && st.fw.uuid;
+
+function log(s) {
+  st.console.push({ t: new Date(), s });
+  if (st.console.length > 400) st.console.shift();
+  if (st.tab === 'bt') renderConsole();
+}
+function buzz(kind) { if (S.vibrate && navigator.vibrate) navigator.vibrate(kind === 'error' ? [80, 60, 80] : 40); }
+
+// ---------------- transports ----------------
+const NUS = { svc: '6e400001-b5a3-f393-e0a9-e50e24dcca9e', write: '6e400002-b5a3-f393-e0a9-e50e24dcca9e', notify: '6e400003-b5a3-f393-e0a9-e50e24dcca9e' };
+const FFE0 = { svc: '0000ffe0-0000-1000-8000-00805f9b34fb', write: '0000ffe1-0000-1000-8000-00805f9b34fb', notify: '0000ffe1-0000-1000-8000-00805f9b34fb' };
+const FFF0 = '0000fff0-0000-1000-8000-00805f9b34fb';
+
+class BLETransport {
+  constructor() { this.onBytes = null; this.simulated = false; this.device = null; this.writeChain = Promise.resolve(); this.manualClose = false; }
+  async pick() {
+    this.device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [NUS.svc, FFE0.svc, FFF0] });
+    this.device.addEventListener('gattserverdisconnected', () => this.onDisconnect());
+  }
+  async connect() {
+    st.linkState = `Connecting to ${this.device.name || 'device'}…`; render();
+    const server = await this.device.gatt.connect();
+    const services = await server.getPrimaryServices();
+    const cands = [];
+    for (const s of services) {
+      let chars = [];
+      try { chars = await s.getCharacteristics(); } catch { continue; }
+      for (const prof of [NUS, FFE0]) {
+        if (s.uuid !== prof.svc) continue;
+        const w = chars.find((c) => c.uuid === prof.write), n = chars.find((c) => c.uuid === prof.notify);
+        if (w && n) cands.push({ name: prof === NUS ? 'Nordic UART (VESC BLE / Express)' : 'HM-10 / FFE0 serial', w, n });
+      }
+      const notif = chars.filter((c) => c.properties.notify || c.properties.indicate);
+      const writ = chars.filter((c) => c.properties.write || c.properties.writeWithoutResponse);
+      for (const n of notif) for (const w of writ) if (!cands.some((c) => c.w === w && c.n === n)) cands.push({ name: `Generic serial (${s.uuid.slice(4, 8)})`, w, n });
+      log(`Service ${s.uuid}: ${chars.map((c) => c.uuid.slice(4, 8)).join(', ')}`);
+    }
+    if (!cands.length) throw new Error('No UART service found. This module may not be a VESC-compatible BLE-UART bridge.');
+    const pick = cands[0];
+    this.w = pick.w; this.n = pick.n; st.uart = pick.name;
+    this.n.addEventListener('characteristicvaluechanged', (e) => {
+      const dv = e.target.value; this.onBytes && this.onBytes(new Uint8Array(dv.buffer, dv.byteOffset, dv.byteLength));
+    });
+    await this.n.startNotifications();
+    log(`Using ${pick.name}`);
+    st.linkState = `Connected to ${this.device.name || 'device'}`;
+  }
+  send(bytes) {
+    const w = this.w; if (!w) return;
+    for (let i = 0; i < bytes.length; i += 20) {
+      const chunk = bytes.slice(i, i + 20);
+      this.writeChain = this.writeChain.then(() =>
+        w.properties.writeWithoutResponse && w.writeValueWithoutResponse ? w.writeValueWithoutResponse(chunk) : w.writeValue(chunk)
+      ).catch((e) => log('Write failed: ' + e.message));
+    }
+  }
+  close() { this.manualClose = true; if (this.device && this.device.gatt.connected) this.device.gatt.disconnect(); }
+  async onDisconnect() {
+    this.w = null;
+    if (this.manualClose) return;
+    connectionLost();
+    if (!S.autoReconnect) { st.linkState = 'Disconnected'; render(); return; }
+    for (let i = 1; !this.manualClose && st.source === 'ble'; i++) {
+      st.linkState = `Connection lost — reconnecting (attempt ${i})…`; render();
+      try { await this.connect(); beginSession(this); return; } catch (e) { log('Reconnect failed: ' + e.message); }
+      await sleep(Math.min(2000 * i, 10000));
+    }
+  }
+}
+
+/** DEMO ONLY: simulated VESC speaking the real protocol, clearly labelled in the UI. */
+class DemoTransport {
+  constructor() {
+    this.simulated = true; this.onBytes = null; this.dec = new C.PacketDecoder(); this.t0 = Date.now(); this.last = Date.now();
+    this.erpm = 0; this.tacho = 0; this.wh = 0; this.whc = 0; this.ah = 0; this.tf = 28; this.tm = 30; this.odo = 1284000;
+    this.mc = DemoTransport.blob('mcconf', 1065524471, { l_current_max: 120, l_current_min: -60, l_in_current_max: 55, l_in_current_min: -10, l_abs_current_max: 250,
+      l_max_erpm: 100000, l_min_erpm: -20000, l_temp_fet_start: 85, l_temp_fet_end: 100, l_temp_motor_start: 85, l_temp_motor_end: 100,
+      l_min_duty: 0.005, l_max_duty: 0.95, l_watt_max: 1500000, l_watt_min: -1500000, l_current_max_scale: 1, l_current_min_scale: 1,
+      foc_fw_current_max: 0, foc_fw_duty_start: 0.9, m_motor_temp_sens_type: 0, si_motor_poles: 30, si_gear_ratio: 1, si_wheel_diameter: 0.254 });
+    this.ap = DemoTransport.blob('appconf', 2099347128, { app_to_use: 2, 'app_adc_conf.hyst': 0.15, 'app_adc_conf.throttle_exp': 0, 'app_adc_conf.ramp_time_pos': 0.3, 'app_adc_conf.ramp_time_neg': 0.1 });
+    this.temp = { currentMinScale: 1, currentMaxScale: 1, minERPM: -20000, maxERPM: 100000, minDuty: 0.005, maxDuty: 0.95, wattMin: -1500000, wattMax: 1500000, inCurrentMin: -10, inCurrentMax: 55 };
+  }
+  static blob(kind, sig, vals) {
+    const l = C.getLayout(kind, sig); const b = new Uint8Array(l.size); b.set(new C.Writer().u32(sig).bytes());
+    const blob = new C.ConfigBlob(kind, b); for (const [k, v] of Object.entries(vals)) if (blob.has(k)) blob.set(k, v); return blob;
+  }
+  close() {}
+  reply(p) { const f = C.encodePacket(p); setTimeout(() => { for (let i = 0; i < f.length; i += 20) this.onBytes && this.onBytes(f.slice(i, i + 20)); }, 20); }
+  send(bytes) { for (const p of this.dec.feed(bytes)) this.handle(p); }
+  handle(p) {
+    const W = () => new C.Writer();
+    switch (p[0]) {
+      case C.CMD.FW_VERSION: { const w = W().u8(0).u8(6).u8(5); for (const c of 'DEMO_SIMULATOR') w.u8(c.charCodeAt(0)); w.u8(0); [0xde, 0x30, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0].forEach((x) => w.u8(x)); this.reply(w.bytes()); break; }
+      case C.CMD.GET_VALUES: this.step(); this.reply(this.values()); break;
+      case C.CMD.GET_VALUES_SETUP_SELECTIVE: this.reply(W().u8(51).u32(1 << 20).u32(this.odo).bytes()); break;
+      case C.CMD.GET_MCCONF: this.reply(this.mc.writePayload(C.CMD.GET_MCCONF)); break;
+      case C.CMD.GET_APPCONF: this.reply(this.ap.writePayload(C.CMD.GET_APPCONF)); break;
+      case C.CMD.SET_MCCONF: try { this.mc = new C.ConfigBlob('mcconf', p.slice(1)); Object.assign(this.temp, { maxERPM: this.mc.get('l_max_erpm'), minERPM: this.mc.get('l_min_erpm'), inCurrentMax: this.mc.get('l_in_current_max'), inCurrentMin: this.mc.get('l_in_current_min') }); this.reply([13]); } catch {} break;
+      case C.CMD.SET_APPCONF: case C.CMD.SET_APPCONF_NO_STORE: try { this.ap = new C.ConfigBlob('appconf', p.slice(1)); this.reply([p[0]]); } catch {} break;
+      case C.CMD.GET_MCCONF_TEMP: { const w = W().u8(91); for (const k of ['currentMinScale', 'currentMaxScale', 'minERPM', 'maxERPM', 'minDuty', 'maxDuty', 'wattMin', 'wattMax', 'inCurrentMin', 'inCurrentMax']) w.f32auto(this.temp[k]); w.u8(30).f32auto(1).f32auto(0.254); this.reply(w.bytes()); break; }
+      case C.CMD.SET_MCCONF_TEMP: { const r = new C.Reader(p, 5); for (const k of ['currentMinScale', 'currentMaxScale', 'minERPM', 'maxERPM', 'minDuty', 'maxDuty', 'wattMin', 'wattMax']) this.temp[k] = r.f32auto(); if (r.remaining >= 8) { this.temp.inCurrentMin = r.f32auto(); this.temp.inCurrentMax = r.f32auto(); } if (p[3]) this.reply([48]); break; }
+      case C.CMD.GET_DECODED_ADC: this.reply(W().u8(32).i32(Math.round(this.thr * 1e6)).i32(Math.round((0.9 + this.thr * 2.1) * 1e6)).i32(0).i32(0).bytes()); break;
+    }
+  }
+  step() {
+    const now = Date.now(), dt = Math.min((now - this.last) / 1000, 0.5); this.last = now;
+    const t = ((now - this.t0) / 1000) % 60; this.thr = t < 4 ? 0 : t < 20 ? 1 : t < 40 ? 0.45 : 0; const brake = t >= 40 && t < 48;
+    const perKmh = 15 * 1000 / 60 / (Math.PI * 0.254); const maxE = Math.min(this.temp.maxERPM, 70 * perKmh);
+    const target = brake ? 0 : this.thr * maxE;
+    if (brake) this.erpm = Math.max(0, this.erpm - 2500 * dt); else if (target > this.erpm) this.erpm = Math.min(target, this.erpm + 1500 * dt); else this.erpm = Math.max(target, this.erpm - 400 * dt);
+    const kmh = this.erpm / perKmh;
+    let pw = this.thr > 0 ? Math.min(this.temp.wattMax, 120 + kmh * kmh * 0.55 + (target > this.erpm ? 900 * this.thr : 0)) : 0;
+    if (brake) pw = kmh > 3 ? -Math.min(Math.abs(this.temp.wattMin), 450) : 0;
+    this.v = Math.max(48, 66.4 - this.wh / 1440 * 16 - Math.max(pw, 0) / 1000 * 1.6);
+    this.ic = Math.min(pw / this.v, this.temp.inCurrentMax); this.duty = Math.min(0.95, this.erpm / (this.v * 400));
+    this.mcur = Math.max(-60, Math.min(120, this.duty > 0.05 ? this.ic / this.duty : brake ? -20 : 0));
+    if (pw > 0) this.wh += pw * dt / 3600; else this.whc -= pw * dt / 3600;
+    this.ah += Math.max(this.ic, 0) * dt / 3600;
+    const steps = this.erpm / 60 * 6 * dt; this.tacho += steps; this.odo += steps / 90 * Math.PI * 0.254;
+    this.tf += (25 + Math.abs(this.mcur) * 0.35 - this.tf) * dt / 40; this.tm += (25 + Math.abs(this.mcur) * 0.45 - this.tm) * dt / 90;
+  }
+  values() {
+    const w = new C.Writer().u8(4).f16(this.tf, 10).f16(this.tm, 10).f32(this.mcur, 100).f32(this.ic, 100).f32(0, 100).f32(this.mcur, 100)
+      .f16(this.duty, 1000).f32(this.erpm, 1).f16(this.v, 10).f32(this.ah, 1e4).f32(0, 1e4).f32(this.wh, 1e4).f32(this.whc, 1e4)
+      .i32(Math.round(this.tacho)).i32(Math.round(this.tacho)).u8(0).f32(0, 1e6).u8(0).f16(this.tf, 10).f16(this.tf, 10).f16(this.tf, 10).f32(0, 1e3).f32(0, 1e3).u8(0);
+    return w.bytes();
+  }
+}
+
+// ---------------- client ----------------
+class Client {
+  constructor(tr) {
+    this.tr = tr; this.dec = new C.PacketDecoder(); this.waiters = {}; this.lastRx = 0; this.rx = 0; this.tx = 0;
+    tr.onBytes = (b) => this.receive(b);
+  }
+  receive(b) {
+    this.rx += b.length;
+    if (Date.now() - this.lastRx > 1000) this.dec.reset();
+    this.lastRx = Date.now();
+    for (const p of this.dec.feed(b)) {
+      if (st.traffic) log(`RX [${p.length}] ${C.hex(p.slice(0, 24))}${p.length > 24 ? '…' : ''}`);
+      const q = this.waiters[p[0]];
+      if (q && q.length) { const w = q.shift(); clearTimeout(w.timer); w.resolve(p); }
+      else if (p[0] === C.CMD.PRINT) log('VESC: ' + new TextDecoder().decode(p.slice(1)));
+    }
+  }
+  send(p) { if (st.traffic) log(`TX [${p.length}] ${C.hex(p.slice(0, 24))}`); const f = C.encodePacket(p); this.tx += f.length; this.tr.send(f); }
+  request(p, expect, timeout = 1500) {
+    return new Promise((resolve, reject) => {
+      const q = (this.waiters[expect] = this.waiters[expect] || []);
+      const w = { resolve, reject };
+      w.timer = setTimeout(() => { const i = q.indexOf(w); if (i >= 0) q.splice(i, 1); reject(new Error(`controller did not answer (command ${expect})`)); }, timeout);
+      q.push(w); this.send(p);
+    });
+  }
+  cancelAll() { for (const q of Object.values(this.waiters)) for (const w of q.splice(0)) { clearTimeout(w.timer); w.reject(new Error('disconnected')); } }
+  fw() { return this.request([0], 0).then(C.decodeFirmware); }
+  values() { return this.request([4], 4, 800).then(C.decodeValues); }
+  odo() { return this.request(C.ODO_REQUEST, 51).then(C.decodeOdometer); }
+  temp() { return this.request([91], 91).then(C.decodeTempLimits); }
+  throttle(ppm) { const c = ppm ? 31 : 32; return this.request([c], c).then(C.decodeThrottle); }
+  readRaw(kind) { const c = kind === 'mcconf' ? 14 : 17; return this.request([c], c, 4000); }
+  setTemp(t) { return this.request(C.encodeTempLimits(t), 48, 2000); }
+  writeConfig(blob, store) {
+    const cmd = blob.kind === 'mcconf' ? (store ? 13 : null) : (store ? 16 : 149);
+    if (cmd == null) throw new Error('Temporary motor config must use COMM_SET_MCCONF_TEMP');
+    return this.request(blob.writePayload(cmd), cmd, 5000);
+  }
+}
+
+let transport = null, client = null, sessionId = 0;
+
+// ---------------- session ----------------
+async function connectBLE() {
+  if (!navigator.bluetooth) { modalInfo('Bluetooth not available in this browser', bluetoothHelp()); return; }
+  stopSession(true);
+  const t = new BLETransport();
+  try { await t.pick(); } catch (e) { if (e.name !== 'NotFoundError') modalInfo('Bluetooth', e.message); return; }
+  transport = t; st.source = 'ble';
+  try { await t.connect(); beginSession(t); } catch (e) { st.linkState = 'Connection failed'; log(e.message); modalInfo('Could not connect', e.message); st.source = 'none'; render(); }
+}
+
+function startDemo() { stopSession(true); transport = new DemoTransport(); st.source = 'demo'; st.linkState = 'Demo simulator'; st.trip.reset(); st.history = []; beginSession(transport); }
+
+function disconnect() { stopSession(true); st.source = 'none'; st.linkState = 'Not connected'; render(); }
+
+function stopSession(closeTransport) {
+  sessionId++;
+  if (client) client.cancelAll();
+  if (closeTransport && transport) transport.close();
+  if (closeTransport) transport = null;
+  client = null;
+  if (st.recording) stopRecording();
+  Object.assign(st, { ready: false, fw: null, mc: null, app: null, mcErr: null, appErr: null, temp: null, tempOK: false, activeProfile: null, v: null, odo: null, odoSupported: null, handshake: '', editMc: null, editApp: null });
+  st.alerts = st.alerts.filter((a) => a.kind === 'conn');
+  st.trip.breakContinuity();
+}
+
+function connectionLost() {
+  if (st.source !== 'ble') return;
+  st.connLost = true;
+  if (client) client.cancelAll();
+  client = null; st.ready = false; sessionId++;
+  st.alerts = [{ kind: 'conn', level: 'critical', title: 'Connection to controller lost', detail: 'No telemetry or alerts. The scooter keeps running on its own settings — use your brakes.' }];
+  buzz('error'); log('Connection lost'); render();
+}
+
+async function beginSession(tr) {
+  const id = ++sessionId;
+  client = new Client(tr);
+  const c = client;
+  st.ready = false; st.trip.breakContinuity();
+  st.handshake = 'Reading firmware version…'; render();
+  let fw = null;
+  for (let i = 0; i < 3 && !fw; i++) { try { fw = await c.fw(); } catch (e) { log(`FW attempt ${i + 1}: ${e.message}`); } if (id !== sessionId) return; }
+  if (!fw) { st.handshake = 'No VESC response. Check the module is a VESC UART bridge, UART is enabled on the controller, and the baud rate matches (usually 115200).'; render(); return; }
+  st.fw = fw; log(`Firmware ${fw.version} on ${fw.hw} (UUID ${fw.uuid})`);
+  st.handshake = 'Reading limits…'; render();
+  try { st.temp = await c.temp(); st.tempOK = true; } catch (e) { st.tempOK = false; log('Temporary limits not supported: ' + e.message); }
+  st.handshake = 'Reading configuration…'; render();
+  await refreshConfig('mcconf'); await refreshConfig('appconf');
+  if (id !== sessionId) return;
+  reconcileBaseline();
+  st.ready = true; st.handshake = ''; st.connLost = false; st.alerts = st.alerts.filter((a) => a.kind !== 'conn');
+  buzz(); render();
+  pollLoop(id, c);
+}
+
+async function refreshConfig(kind) {
+  if (!client) return;
+  try {
+    const raw = await client.readRaw(kind);
+    try {
+      const b = C.ConfigBlob.fromReply(kind, raw);
+      if (kind === 'mcconf') { st.mc = b; st.mcErr = null; st.editMc = b.clone(); } else { st.app = b; st.appErr = null; st.editApp = b.clone(); }
+      log(`${kind}: verified layout (firmware ${b.layout.fw.join('/')})`);
+    } catch (e) {
+      if (kind === 'mcconf') { st.mc = null; st.mcErr = e.message; } else { st.app = null; st.appErr = e.message; }
+      log(`${kind}: ${e.message}. Read-only.`);
+    }
+  } catch (e) { if (kind === 'mcconf') st.mcErr = 'Could not read: ' + e.message; else st.appErr = 'Could not read: ' + e.message; }
+}
+
+function reconcileBaseline() {
+  const id = uuid(); if (!id || !st.temp) return;
+  st.tempUnknown = false;
+  const b = baselines[id];
+  if (!b) { baselines[id] = { limits: st.temp, appHex: st.app ? C.hex(st.app.bytes) : null, at: Date.now() }; st.profileStatus = 'Baseline captured from the controller\'s current configuration.'; st.activeProfile = null; }
+  else if (C.tempLimitsEqual(st.temp, b.limits)) { st.activeProfile = null; b.lastProfile = null; b.lastLimits = null; st.profileStatus = 'Normal configuration (no profile active).'; }
+  else if (b.lastLimits && C.tempLimitsEqual(st.temp, b.lastLimits)) { st.activeProfile = b.lastProfile; st.profileStatus = `${(b.lastProfile || '').toUpperCase()} still active (controller not power-cycled).`; }
+  else { st.tempUnknown = true; st.profileStatus = 'Controller limits differ from the saved baseline (changed by another tool?). Review, then use "Use current as baseline".'; }
+  saveBaselines();
+}
+
+async function pollLoop(id, c) {
+  let lastOdo = 0;
+  while (id === sessionId && client === c) {
+    const t0 = Date.now();
+    try { ingest(await c.values()); st.timeouts = 0; }
+    catch { if (id !== sessionId) return; if (++st.timeouts === 5) { st.alerts.unshift({ kind: 'conn', level: 'critical', title: 'Controller not responding', detail: 'No telemetry for several requests.' }); buzz('error'); renderAlerts(); } }
+    if (st.odoSupported !== false && Date.now() - lastOdo > 5000) {
+      lastOdo = Date.now();
+      try { st.odo = await c.odo(); st.odoSupported = st.odo != null; } catch { st.odoSupported = false; }
+    }
+    const wait = 1000 / Math.max(2, Math.min(S.pollHz, 20)) - (Date.now() - t0);
+    if (wait > 0) await sleep(wait);
+  }
+}
+
+function ingest(v) {
+  const now = Date.now();
+  st.v = v; st.vAt = now;
+  st.trip.ingest(v, geo());
+  const kmh = C.speedKmh(v.erpm, geo());
+  st.history.push({ t: now, speed: kmh, watts: v.voltage * v.inputCurrent, voltage: v.voltage, motorA: v.motorCurrent, battA: v.inputCurrent, fet: v.tempMosfet });
+  if (st.history.length > 6000) st.history.splice(0, st.history.length - 6000);
+  if (st.recording) st.rec.push({ t: now, speed: kmh, erpm: v.erpm, voltage: v.voltage, batteryCurrent: v.inputCurrent, motorCurrent: v.motorCurrent, watts: v.voltage * v.inputCurrent, duty: v.duty, tempMosfet: v.tempMosfet, tempMotor: motorSensor() ? v.tempMotor : null, tripKm: st.trip.km, fault: v.fault });
+  if (v.fault && v.fault !== st.lastFault) { st.faults.unshift({ t: now, code: v.fault }); log('FAULT: ' + C.faultName(v.fault)); }
+  st.lastFault = v.fault;
+  const prev = new Set(st.alerts.map((a) => a.kind + a.level));
+  const fresh = C.evaluateAlerts(v, pct(), S.battery, thresholds());
+  if (fresh.some((a) => !prev.has(a.kind + a.level))) buzz(fresh[0].level === 'critical' ? 'error' : 'warn');
+  st.alerts = st.alerts.filter((a) => a.kind === 'conn' && st.timeouts >= 5).concat(fresh);
+  renderLive();
+}
+
+// ---------------- safety-gated writes ----------------
+async function stationary() {
+  if (!client) return { ok: false, failures: ['Not connected.'] };
+  let v = null; try { v = await client.values(); ingest(v); } catch {}
+  const p = caps().throttlePrefix; let thr = null;
+  if (p) try { thr = await client.throttle(p === 'app_ppm_conf'); } catch {}
+  return C.stationaryCheck(v, v ? 0 : Infinity, thr, !!p);
+}
+
+function planFor(kind) {
+  if (!st.temp || !st.tempOK) throw new Error('Temporary limits are not supported by this controller.');
+  const b = baselines[uuid()]; if (!b) throw new Error('No baseline for this controller.');
+  if (st.tempUnknown) throw new Error('Controller limits don\'t match the saved baseline. Review them, then tap "Use current as baseline".');
+  if (!S.geometryConfirmed) throw new Error('Confirm wheel size and pole pairs in Setup first.');
+  let baseApp = st.app;
+  if (b.appHex) try { baseApp = new C.ConfigBlob('appconf', C.unhex(b.appHex)); } catch {}
+  return C.planProfile(S.profiles.find((p) => p.kind === kind), b.limits, st.temp, geo(), caps(), baseApp);
+}
+
+async function applyPlan(plan) {
+  if (S.readOnly) throw new Error('Read-only mode is on.');
+  const chk = await stationary(); if (!chk.ok) throw new Error(chk.failures.join('\n'));
+  await client.setTemp(plan.limits);
+  if (plan.app) await client.writeConfig(plan.app, false);
+  const back = await client.temp(); st.temp = back;
+  if (!C.tempLimitsEqual(back, plan.limits)) throw new Error('Controller reports different limits than requested (hardware clamp?).');
+  if (plan.app) await refreshConfig('appconf');
+  const b = baselines[uuid()]; b.lastProfile = plan.profile.kind; b.lastLimits = back; saveBaselines();
+  st.activeProfile = plan.profile.kind; st.profileStatus = `${plan.profile.name} active (temporary until power-off).`;
+  log(`Applied ${plan.profile.name}: max ERPM ${Math.round(back.maxERPM)}, max ${Math.round(back.wattMax)} W`);
+  return `${plan.profile.name} applied and verified.`;
+}
+
+async function restoreBaseline() {
+  if (S.readOnly) throw new Error('Read-only mode is on.');
+  const b = baselines[uuid()]; if (!b) throw new Error('No baseline.');
+  const chk = await stationary(); if (!chk.ok) throw new Error(chk.failures.join('\n'));
+  await client.setTemp(b.limits);
+  if (caps().fwNumber >= 600 && b.appHex && st.app && C.hex(st.app.bytes) !== b.appHex) {
+    try { const blob = new C.ConfigBlob('appconf', C.unhex(b.appHex)); if (blob.sig === st.app.sig) { await client.writeConfig(blob, false); await refreshConfig('appconf'); } } catch (e) { log(e.message); }
+  }
+  st.temp = await client.temp(); b.lastProfile = null; b.lastLimits = null; saveBaselines();
+  st.activeProfile = null; st.tempUnknown = false; st.profileStatus = 'Normal configuration restored.';
+  return 'Normal limits restored.';
+}
+
+function addBackup(blob, note) {
+  backups.unshift({ id: Date.now() + Math.random().toString(36).slice(2, 6), at: Date.now(), uuid: st.fw.uuid, hw: st.fw.hw, fw: st.fw.version, kind: blob.kind, sig: blob.sig, hex: C.hex(blob.bytes), note });
+  saveBackups();
+}
+
+async function writeConfig(orig, edited) {
+  if (S.readOnly) throw new Error('Read-only mode is on.');
+  if (C.validate(orig, edited, S.hw, geo()).some((i) => i.severity === 'blocked')) throw new Error('Blocked by validation.');
+  if (edited.kind === 'mcconf' && (st.activeProfile || st.tempUnknown)) throw new Error('A temporary profile is active. Restore normal limits on the Profiles tab first.');
+  const fresh = C.ConfigBlob.fromReply(edited.kind, await client.readRaw(edited.kind));
+  if (!fresh.equals(orig)) throw new Error('The controller configuration changed since it was read. Reload and try again.');
+  addBackup(fresh, 'Automatic backup before editing ' + edited.changes(orig).map((c) => c.name).join(', '));
+  const chk = await stationary(); if (!chk.ok) throw new Error(chk.failures.join('\n'));
+  await client.writeConfig(edited, true);
+  const after = C.ConfigBlob.fromReply(edited.kind, await client.readRaw(edited.kind));
+  if (edited.kind === 'mcconf') { st.mc = after; st.editMc = after.clone(); try { st.temp = await client.temp(); baselines[uuid()].limits = st.temp; saveBaselines(); } catch {} }
+  else { st.app = after; st.editApp = after.clone(); if (baselines[uuid()]) { baselines[uuid()].appHex = C.hex(after.bytes); saveBaselines(); } }
+  const bad = edited.changes(orig).filter((c) => Math.abs((after.get(c.name) ?? NaN) - c.new) > Math.max(1e-3, Math.abs(c.new) * 1e-4));
+  if (bad.length) throw new Error(`Written, but the controller adjusted: ${bad.map((c) => c.name).join(', ')} (hardware clamp). A backup was saved.`);
+  log(`Wrote ${edited.kind}: ${edited.changes(orig).map((c) => `${c.name}=${c.new}`).join(', ')}`);
+  return 'Saved to the controller and verified. A backup was stored first.';
+}
+
+async function restoreBackup(bk) {
+  if (S.readOnly) throw new Error('Read-only mode is on.');
+  if (bk.uuid !== uuid()) throw new Error('This backup belongs to a different controller.');
+  const target = new C.ConfigBlob(bk.kind, C.unhex(bk.hex));
+  const cur = bk.kind === 'mcconf' ? st.mc : st.app;
+  if (!cur || cur.sig !== target.sig) throw new Error('Different firmware configuration layout — cannot restore here.');
+  if (bk.kind === 'mcconf' && (st.activeProfile || st.tempUnknown)) throw new Error('Restore normal limits on the Profiles tab first.');
+  const fresh = C.ConfigBlob.fromReply(bk.kind, await client.readRaw(bk.kind));
+  addBackup(fresh, 'Automatic backup before rollback');
+  const chk = await stationary(); if (!chk.ok) throw new Error(chk.failures.join('\n'));
+  await client.writeConfig(target, true);
+  const after = C.ConfigBlob.fromReply(bk.kind, await client.readRaw(bk.kind));
+  if (bk.kind === 'mcconf') { st.mc = after; st.editMc = after.clone(); try { st.temp = await client.temp(); baselines[uuid()].limits = st.temp; saveBaselines(); } catch {} } else { st.app = after; st.editApp = after.clone(); }
+  return after.equals(target) ? 'Restored and verified.' : 'Restored, but read-back differs (firmware may clamp values).';
+}
+
+async function backupNow() {
+  for (const kind of ['mcconf', 'appconf']) {
+    const raw = await client.readRaw(kind); const bytes = raw.slice(1);
+    let sig = 0; try { sig = new C.Reader(bytes).u32(); } catch {}
+    backups.unshift({ id: Date.now() + kind, at: Date.now(), uuid: st.fw.uuid, hw: st.fw.hw, fw: st.fw.version, kind, sig, hex: C.hex(bytes), note: 'Manual backup' });
+  }
+  saveBackups(); downloadBackups();
+  return 'Backed up both configurations and downloaded a copy.';
+}
+
+function downloadBackups() { download(`vescdash-backups-${stamp()}.json`, JSON.stringify(backups, null, 1), 'application/json'); }
+
+// ---------------- recording ----------------
+function startRecording() { st.rec = []; st.recStart = Date.now(); st.recording = true; render(); }
+function stopRecording() {
+  st.recording = false;
+  if (st.rec.length) { download(`ride_${stamp(st.recStart)}.csv`, C.renderCSV(st.rec), 'text/csv'); log(`Ride log saved (${st.rec.length} samples)`); }
+  st.rec = []; render();
+}
+function stamp(t = Date.now()) { const d = new Date(t), p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}_${p(d.getHours())}-${p(d.getMinutes())}-${p(d.getSeconds())}`; }
+function download(name, text, type) {
+  const url = URL.createObjectURL(new Blob([text], { type }));
+  const a = Object.assign(document.createElement('a'), { href: url, download: name }); document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+// ---------------- UI: shell ----------------
+const TABS = [['dash', 'Dashboard', 'M12 21a9 9 0 1 1 9-9M12 12l5-5'], ['profiles', 'Profiles', 'M4 6h16M4 12h10M4 18h6'], ['graphs', 'Graphs', 'M3 17l5-6 4 4 8-10'], ['settings', 'Settings', 'M6 4v16M18 4v16M12 4v16M4 9h4M10 14h4M16 7h4'], ['bt', 'Bluetooth', 'M7 7l10 10-5 5V2l5 5L7 17']];
+
+function render() {
+  $('#demo').hidden = st.source !== 'demo';
+  $('#tabs').innerHTML = TABS.map(([id, label, d]) => `<button class="tab ${st.tab === id ? 'on' : ''}" data-tab="${id}"><svg viewBox="0 0 24 24"><path d="${d}"/></svg><span>${label}</span></button>`).join('');
+  renderAlerts();
+  const v = $('#view');
+  v.innerHTML = ({ dash: viewDash, profiles: viewProfiles, graphs: viewGraphs, settings: viewSettings, bt: viewBT })[st.tab]();
+  if (st.tab === 'graphs') drawCharts();
+  if (st.tab === 'bt') renderConsole();
+}
+function renderAlerts() {
+  $('#alerts').innerHTML = st.alerts.slice(0, 3).map((a) => `<div class="alert ${a.level}"><b>${esc(a.title)}</b><span>${esc(a.detail)}</span></div>`).join('');
+}
+function renderLive() {
+  renderAlerts();
+  if (st.tab === 'dash') { if ($('#speed')) updateDash(); else render(); }
+  else if (st.tab === 'graphs') { if (!st._chartPending) { st._chartPending = true; requestAnimationFrame(() => { st._chartPending = false; drawCharts(); }); } }
+  else if (st.tab === 'bt' && $('#linkstats')) $('#linkstats').innerHTML = linkStats();
+  if (st.recording && $('#reccount')) $('#reccount').textContent = `${st.rec.length} samples`;
+}
+
+const statusDot = () => st.ready ? (st.source === 'demo' ? 'amber' : 'green') : st.connLost ? 'red' : 'grey';
+const statusLine = () => st.ready ? (st.source === 'demo' ? 'Simulator · FW 6.05' : `${st.fw.hw} · FW ${st.fw.version}`) : (st.handshake || st.linkState);
+
+// ---------------- UI: dashboard ----------------
+function gaugeArc(frac, r, w, cls) {
+  const a0 = 135, sweep = 270 * Math.min(Math.max(frac, 0), 1), rad = (d) => d * Math.PI / 180;
+  const p = (d) => `${150 + r * Math.cos(rad(d))} ${150 + r * Math.sin(rad(d))}`;
+  const track = `M${p(a0)} A${r} ${r} 0 1 1 ${p(a0 + 270)}`;
+  const fill = sweep < 0.5 ? '' : `M${p(a0)} A${r} ${r} 0 ${sweep > 180 ? 1 : 0} 1 ${p(a0 + sweep)}`;
+  return `<path class="track" d="${track}" stroke-width="${w}"/><path class="${cls}" d="${fill}" stroke-width="${w}"/>`;
+}
+
+function viewDash() {
+  if (!st.ready) return `<section class="card center"><h2>No controller connected</h2>
+    <p class="dim">${esc(st.handshake || 'Connect your VESC Bluetooth module, or try the demo. Nothing is shown until real data arrives.')}</p>
+    <button class="btn primary" data-act="connect">Connect Bluetooth</button> <button class="btn" data-act="demo">Try demo</button>
+    ${!navigator.bluetooth ? `<p class="warn small">${bluetoothHelp()}</p>` : ''}</section>`;
+  return `<section class="card gauge-card">
+    <div class="head"><span class="brand">KUKIRIN G2 MASTER</span>${st.activeProfile ? `<span class="pill">${st.activeProfile.toUpperCase()}</span>` : ''}</div>
+    <div class="gauge"><svg viewBox="0 0 300 300" id="gsvg"></svg>
+      <div class="gcenter"><div id="speed" class="big">—</div><div class="unit">km/h</div><div id="watts" class="watts">— W</div></div></div>
+    <div class="batt"><span id="bpct">— %</span><small>est.</small><span class="sp"></span><span id="bvolt">— V</span></div>
+    <div class="bar"><div id="bbar"></div></div></section>
+    <section class="grid" id="tiles"></section>
+    <section class="card row"><button class="btn ${st.recording ? 'danger' : 'primary'}" data-act="rec">${st.recording ? '■ Stop & download log' : '● Record ride log'}</button>
+    <span id="reccount" class="dim small">${st.recording ? st.rec.length + ' samples' : ''}</span><span class="sp"></span><button class="btn ghost small" data-act="resettrip">Reset trip</button></section>
+    <p class="foot">Speed and distance come from controller ERPM and tachometer using your Setup values. Battery % is estimated from voltage.</p>`;
+}
+
+function tile(title, val, unit, cls = '', foot = '') {
+  return `<div class="tile"><div class="tt">${title}</div><div class="tv ${val === '—' ? 'faint' : cls}">${val}<small>${unit}</small></div>${foot ? `<div class="tf">${foot}</div>` : ''}</div>`;
+}
+function tempCls(t, start) { return t == null ? '' : t >= start ? 'red' : t >= start - 10 ? 'amber' : ''; }
+
+function updateDash() {
+  const v = st.v; if (!v) return;
+  const kmh = Math.abs(C.speedKmh(v.erpm, geo())), w = v.voltage * v.inputCurrent, p = pct(), th = thresholds();
+  const maxPow = Math.max(2000, ...S.profiles.map((x) => x.power));
+  $('#gsvg').innerHTML = gaugeArc(kmh / 80, 130, 16, 'fill') + gaugeArc(Math.max(w, 0) / maxPow, 104, 5, 'fill2');
+  $('#speed').textContent = show(kmh); $('#watts').textContent = `${show(w)} W`; $('#watts').className = 'watts' + (w < 0 ? ' green' : '');
+  const bc = p <= S.battery.critical ? 'red' : p <= S.battery.low ? 'amber' : 'green';
+  $('#bpct').textContent = `${show(p)} %`; $('#bpct').className = bc; $('#bvolt').textContent = `${show(v.voltage, 1)} V`;
+  $('#bbar').style.width = `${p}%`; $('#bbar').className = bc;
+  const remWh = C.nominalWh(S.battery) * p / 100, wpk = st.trip.whPerKm;
+  $('#tiles').innerHTML = [
+    tile('Battery current', show(v.inputCurrent, 1), 'A', v.inputCurrent < 0 ? 'green' : ''),
+    tile('Motor current', show(v.motorCurrent, 1), 'A'),
+    tile('Motor RPM', show(v.erpm / geo().polePairs), 'rpm', '', `ERPM ${show(v.erpm)}`),
+    tile('Duty cycle', show(v.duty * 100), '%', Math.abs(v.duty) > 0.9 ? 'amber' : ''),
+    tile('Controller temp', show(v.tempMosfet), '°C', tempCls(v.tempMosfet, th.fetStart)),
+    tile('Motor temp', motorSensor() ? show(v.tempMotor) : '—', '°C', motorSensor() ? tempCls(v.tempMotor, th.motorStart) : '', motorSensor() ? '' : 'no sensor reported'),
+    tile('Trip', show(st.trip.km, 2), 'km', '', `max ${show(st.trip.maxKmh)} km/h`),
+    tile('Odometer', show(st.odo == null ? null : st.odo / 1000, 1), 'km', '', st.odoSupported === false ? 'not reported' : 'controller'),
+    tile('Consumption', show(wpk, 1), 'Wh/km', '', wpk == null ? 'needs ≥ 0.3 km' : `${show(st.trip.netWh, 1)} Wh trip`),
+    tile('Est. range', show(wpk ? remWh / wpk : null), 'km', '', `≈${show(remWh)} Wh left`),
+  ].join('');
+}
+
+// ---------------- UI: profiles ----------------
+function curveSVG(expo, w = 90, h = 56) {
+  let d = ''; for (let i = 0; i <= 20; i++) { const x = i / 20, y = C.throttleCurve(x, expo); d += `${i ? 'L' : 'M'}${(x * (w - 8) + 4).toFixed(1)} ${(h - 4 - y * (h - 8)).toFixed(1)}`; }
+  return `<svg class="curve" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><path d="${d}"/></svg>`;
+}
+
+function viewProfiles() {
+  const b = st.fw && baselines[uuid()];
+  let status = '<p class="dim">Connect to a controller to use profiles.</p>';
+  if (st.ready && !st.tempOK) status = '<p class="red">This firmware did not answer COMM_GET_MCCONF_TEMP, so profiles are disabled.</p>';
+  else if (st.ready) status = `<p>${esc(st.profileStatus)}</p>
+    ${b ? `<p class="small dim">Normal limits: max ERPM ${show(b.limits.maxERPM)} ≈ ${show(C.speedKmh(b.limits.maxERPM, geo()))} km/h · ${show(b.limits.wattMax)} W · battery ${show(b.limits.inCurrentMax)} A</p>` : ''}
+    <div class="row"><button class="btn" data-act="restore" ${S.readOnly ? 'disabled' : ''}>Restore normal limits</button>${st.tempUnknown ? '<button class="btn amber" data-act="recapture">Use current as baseline</button>' : ''}</div>
+    ${S.readOnly ? '<p class="amber small">🔒 Read-only mode is on — profiles can be reviewed but not applied (Bluetooth tab).</p>' : ''}
+    ${!S.geometryConfirmed ? '<p class="amber small">Confirm wheel size and pole pairs in Setup (Bluetooth tab) first.</p>' : ''}`;
+  return `<h1>Ride profiles</h1><section class="card"><div class="lbl">Controller state</div>${status}</section>
+    ${S.profiles.map((p) => `<section class="card"><div class="head"><span class="pname ${st.activeProfile === p.kind ? 'neon' : ''}">${p.name}</span>${st.activeProfile === p.kind ? '<span class="pill solid">ACTIVE</span>' : ''}<span class="sp"></span><button class="btn ghost small" data-act="editprofile" data-k="${p.kind}">Edit</button></div>
+      <div class="grid2">${tile('Speed target', show(p.speed), 'km/h')}${tile('Power target', show(p.power), 'W')}</div>
+      <div class="row">${curveSVG(p.expo)}<div class="small"><div>Throttle: ramp ${show(p.ramp, 2)} s, expo ${show(p.expo, 2)}</div><div class="dim">${p.applyThrottle ? 'Throttle response applied with profile' : 'Throttle response not changed'}</div></div></div>
+      <button class="btn primary wide" data-act="plan" data-k="${p.kind}" ${st.ready ? '' : 'disabled'}>Review &amp; apply ${p.name}</button></section>`).join('')}
+    <section class="card small dim"><div class="lbl">How profiles work</div>Profiles use the firmware's temporary-limit command (COMM_SET_MCCONF_TEMP, never saved to flash). They only lower max ERPM and max power below your controller's normal configuration and can never raise current, voltage, ERPM or temperature limits. Throttle response uses COMM_SET_APPCONF_NO_STORE (firmware 6.00+). Everything returns to normal at power-off. Speed and power are targets — battery/motor current limits, sag and temperature protection can keep you below them.</section>`;
+}
+
+function editProfile(kind) {
+  const p = S.profiles.find((x) => x.kind === kind);
+  modal(`Edit ${p.name}`, `<label>Speed limit (km/h)<input type="number" id="pf-speed" value="${p.speed}" step="1"></label>
+    <label>Power limit (W)<input type="number" id="pf-power" value="${p.power}" step="50"></label>
+    <label class="chk"><input type="checkbox" id="pf-thr" ${p.applyThrottle ? 'checked' : ''}> Apply throttle response</label>
+    <label>Positive ramp (s)<input type="number" id="pf-ramp" value="${p.ramp}" step="0.05"></label>
+    <label>Expo (negative = gentler)<input type="number" id="pf-expo" value="${p.expo}" step="0.1"></label>
+    <div class="row"><button class="btn small" data-preset="smooth">Smooth</button><button class="btn small" data-preset="medium">Medium</button><button class="btn small" data-preset="direct">Direct</button><span class="sp"></span><span id="pf-curve">${curveSVG(p.expo)}</span></div>
+    <p class="small dim">Targets only. When applied, speed and power are capped at your controller's normal configuration.</p>`,
+  [['Reset defaults', () => { Object.assign(p, C.DEFAULT_PROFILES.find((d) => d.kind === kind)); saveSettings(); render(); }], ['Cancel'], ['Save', () => {
+    p.speed = +$('#pf-speed').value; p.power = +$('#pf-power').value; p.applyThrottle = $('#pf-thr').checked; p.ramp = +$('#pf-ramp').value; p.expo = +$('#pf-expo').value;
+    saveSettings(); render();
+  }, 'primary']]);
+  const m = $('#modal');
+  m.addEventListener('click', (e) => { const pr = e.target.dataset.preset; if (pr) { $('#pf-ramp').value = C.THROTTLE_PRESETS[pr].ramp; $('#pf-expo').value = C.THROTTLE_PRESETS[pr].expo; $('#pf-curve').innerHTML = curveSVG(C.THROTTLE_PRESETS[pr].expo); } });
+  $('#pf-expo').addEventListener('input', (e) => { $('#pf-curve').innerHTML = curveSVG(+e.target.value || 0); });
+}
+
+function reviewPlan(kind) {
+  let plan; try { plan = planFor(kind); } catch (e) { modalInfo('Profile', e.message); return; }
+  modal(`Apply ${plan.profile.name}?`, `<div class="lbl">Exact changes (temporary)</div>
+    ${plan.changes.length ? plan.changes.map((c) => `<div class="chg"><b>${esc(c.setting)}</b><div class="mono">${esc(c.from)} → <span class="neon">${esc(c.to)}</span></div>${c.note ? `<div class="small dim">${c.note}</div>` : ''}</div>`).join('') : '<p class="dim">No change — already running these limits.</p>'}
+    <div class="lbl">Result</div><p>Speed cap ≈ <b>${show(plan.speed)} km/h</b> · Power cap <b>${show(plan.power)} W</b></p>
+    <div class="lbl">Notes</div><ul class="small">${plan.notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>
+    <p class="small">✓ The app checks the scooter is stationary and the throttle released before sending, then reads the limits back.</p>
+    ${S.readOnly ? '<p class="amber">🔒 Read-only mode is on. Turn it off in the Bluetooth tab to apply.</p>' : ''}`,
+  [['Cancel'], ['Apply', () => runTask(() => applyPlan(plan)), 'primary', S.readOnly]]);
+}
+
+// ---------------- UI: graphs ----------------
+const METRICS = [['speed', 'Speed', 'km/h', '#00b8ff'], ['watts', 'Power', 'W', '#3de3ff'], ['voltage', 'Battery voltage', 'V', '#33f29a'], ['motorA', 'Motor current', 'A', '#ffb021'], ['battA', 'Battery current', 'A', '#b07cff'], ['fet', 'Controller temperature', '°C', '#ff3b4f']];
+let graphRange = 60;
+function viewGraphs() {
+  return `<h1>Live graphs</h1><div class="seg">${[30, 60, 300, 600].map((r) => `<button data-range="${r}" class="${graphRange === r ? 'on' : ''}">${r < 60 ? r + ' s' : r / 60 + ' min'}</button>`).join('')}</div>
+    ${st.history.length ? METRICS.map(([k, t, u]) => `<section class="card chart"><div class="head"><span class="lbl">${t}</span><span class="sp"></span><span id="cv-${k}" class="mono"></span></div><canvas id="c-${k}"></canvas><div class="mm small faint" id="mm-${k}"></div></section>`).join('') : '<section class="card dim">No telemetry yet. Graphs show real controller data once connected.</section>'}
+    <section class="card"><div class="lbl">Controller faults this session</div>${st.faults.length ? st.faults.map((f) => `<div class="chg"><b class="red mono">${new Date(f.t).toLocaleTimeString()} ${C.faultName(f.code)}</b><div class="small dim">${C.faultHelp(f.code)}</div></div>`).join('') : '<p class="green">✓ No faults reported</p>'}</section>
+    <section class="card"><div class="head"><span class="lbl">Ride log (CSV)</span><span class="sp"></span><button class="btn ${st.recording ? 'danger' : 'primary'} small" data-act="rec" ${st.ready || st.recording ? '' : 'disabled'}>${st.recording ? 'Stop & download' : 'Start recording'}</button></div>
+    <p class="small dim">${st.recording ? `<span id="reccount">${st.rec.length} samples</span>` : 'Recording downloads a CSV file when you stop.'}</p></section>`;
+}
+function drawCharts() {
+  if (st.tab !== 'graphs') return;
+  const now = Date.now(), from = now - graphRange * 1000;
+  let pts = st.history.filter((p) => p.t >= from); const stride = Math.ceil(pts.length / 400); if (stride > 1) pts = pts.filter((_, i) => i % stride === 0);
+  for (const [k, , u, col] of METRICS) {
+    const cv = $('#c-' + k); if (!cv) continue;
+    const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = 110;
+    if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+    const g = cv.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, W, H);
+    if (!pts.length) continue;
+    const vals = pts.map((p) => p[k]); let lo = Math.min(...vals), hi = Math.max(...vals); if (hi - lo < 1e-6) { hi += 1; lo -= 1; } const pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+    const X = (t) => 34 + (t - from) / (now - from) * (W - 38), Y = (v) => 6 + (1 - (v - lo) / (hi - lo)) * (H - 16);
+    g.strokeStyle = 'rgba(255,255,255,.06)'; g.fillStyle = 'rgba(255,255,255,.35)'; g.font = '10px ui-rounded, system-ui'; g.lineWidth = 1;
+    for (let i = 0; i <= 2; i++) { const v = lo + (hi - lo) * i / 2, y = Y(v); g.beginPath(); g.moveTo(34, y); g.lineTo(W, y); g.stroke(); g.fillText(Math.abs(v) >= 100 ? v.toFixed(0) : v.toFixed(1), 0, y + 3); }
+    g.beginPath(); pts.forEach((p, i) => (i ? g.lineTo : g.moveTo).call(g, X(p.t), Y(p[k])));
+    g.strokeStyle = col; g.lineWidth = 2; g.shadowColor = col; g.shadowBlur = 6; g.stroke(); g.shadowBlur = 0;
+    g.lineTo(X(pts[pts.length - 1].t), H - 10); g.lineTo(X(pts[0].t), H - 10); g.closePath();
+    const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, col + '40'); gr.addColorStop(1, col + '00'); g.fillStyle = gr; g.fill();
+    $('#cv-' + k).textContent = `${show(vals[vals.length - 1], 1)} ${u}`; $('#cv-' + k).style.color = col;
+    $('#mm-' + k).textContent = `min ${show(Math.min(...vals), 1)} · max ${show(Math.max(...vals), 1)}`;
+  }
+}
+
+// ---------------- UI: settings ----------------
+function viewSettings() {
+  if (!st.ready) return '<h1>VESC settings</h1><section class="card dim">Connect to a controller to read its configuration.</section>';
+  const defs = C.supportedSettings(st.mc, st.app);
+  const groups = [...new Set(defs.map((d) => d.group))];
+  const n = pending().length;
+  return `<h1>VESC settings</h1><section class="card small">
+    <div>Firmware <b>${st.fw.version}</b> · Motor config: ${st.mc ? 'verified layout' : `<span class="amber">${esc(st.mcErr || 'not available')}</span>`} · App config: ${st.app ? 'verified layout' : `<span class="amber">${esc(st.appErr || 'not available')}</span>`}</div>
+    ${S.readOnly ? '<p class="amber">🔒 Read-only mode: you can try edits, but writing is disabled (Bluetooth tab).</p>' : ''}
+    ${!S.hwConfirmed ? '<p class="amber">Confirm your controller and battery ratings in Bluetooth › Hardware limits. Validation uses them.</p>' : ''}
+    ${st.activeProfile || st.tempUnknown ? '<p class="amber">A temporary profile is active — restore normal limits (Profiles) before saving motor settings.</p>' : ''}
+    ${(!st.mc || !st.app) ? `<p class="dim">Editing needs a verified layout. Supported firmware: ${C.supportedFirmware().join(', ')}.</p>` : ''}
+    <div class="row"><button class="btn small" data-act="reloadcfg">Reload from controller</button><span class="sp"></span><button class="btn primary" data-act="review" ${n ? '' : 'disabled'}>Review changes (${n})</button></div></section>
+    ${groups.map((g) => `<section class="card"><div class="lbl">${g}</div>${defs.filter((d) => d.group === g).map(settingRow).join('')}</section>`).join('')}`;
+}
+function settingRow(d) {
+  const orig = (d.kind === 'mcconf' ? st.mc : st.app).get(d.field), ed = (d.kind === 'mcconf' ? st.editMc : st.editApp).get(d.field);
+  const dec = d.step >= 1 ? 0 : d.step >= 0.1 ? 1 : 2, changed = Math.abs(orig - ed) > 1e-9;
+  const kmh = /erpm/.test(d.field) && C.geometryValid(geo()) ? ` · ≈ ${show(Math.abs(C.speedKmh(ed, geo())))} km/h` : '';
+  return `<div class="set ${changed ? 'changed' : ''}"><label><span>${d.title}</span><span class="in"><input type="number" inputmode="decimal" step="${d.step}" value="${(ed * d.factor).toFixed(dec)}" data-field="${d.field}" data-kind="${d.kind}" data-factor="${d.factor}"><small>${d.unit}</small></span></label>
+    <div class="small dim">Controller: ${(orig * d.factor).toFixed(dec)} ${d.unit}${kmh}${changed ? ' · <b class="neon">EDITED</b>' : ''}</div><div class="small faint">${d.help}</div></div>`;
+}
+function pending() {
+  const out = [];
+  if (st.mc && st.editMc) { const c = st.editMc.changes(st.mc); if (c.length) out.push({ orig: st.mc, ed: st.editMc, c, issues: C.validate(st.mc, st.editMc, S.hw, geo()) }); }
+  if (st.app && st.editApp) { const c = st.editApp.changes(st.app); if (c.length) out.push({ orig: st.app, ed: st.editApp, c, issues: C.validate(st.app, st.editApp, S.hw, geo()) }); }
+  return out;
+}
+function reviewChanges() {
+  const items = pending(); const title = (f) => (C.SETTINGS.find((s) => s.field === f) || {}).title || f;
+  const blocked = items.some((i) => i.issues.some((x) => x.severity === 'blocked')), warn = items.some((i) => i.issues.some((x) => x.severity === 'warning'));
+  modal('Review changes', items.map((i) => `<div class="lbl">${i.ed.kind === 'mcconf' ? 'Motor configuration' : 'App configuration'}</div>
+      ${i.c.map((c) => `<div class="chg mono">${title(c.name)}: ${show(c.old, 2)} → <span class="neon">${show(c.new, 2)}</span></div>`).join('')}
+      ${i.issues.map((x) => `<div class="issue ${x.severity}">${x.severity === 'blocked' ? '⛔' : '⚠️'} ${esc(x.message)}</div>`).join('')}`).join('')
+    + `<ul class="small"><li>A full backup is saved before writing.</li><li>The scooter must be stationary with throttle released.</li><li>Values are read back and verified.</li></ul>
+    ${warn && !blocked ? '<label class="chk"><input type="checkbox" id="ack"> I understand the warnings and accept the risk</label>' : ''}
+    ${S.readOnly ? '<p class="amber">🔒 Read-only mode is on.</p>' : blocked ? '<p class="red">Some changes are blocked and cannot be written.</p>' : ''}`,
+  [['Discard edits', () => { st.editMc = st.mc && st.mc.clone(); st.editApp = st.app && st.app.clone(); render(); }], ['Cancel'], ['Write', () => {
+    if (warn && !$('#ack').checked) { modalInfo('Confirm', 'Tick the acknowledgement box first.'); return; }
+    runTask(async () => { const msgs = []; for (const i of items) msgs.push(await writeConfig(i.orig, i.ed)); return msgs.join('\n'); });
+  }, 'primary', blocked || S.readOnly]]);
+}
+
+// ---------------- UI: bluetooth / diagnostics ----------------
+function bluetoothHelp() {
+  return /iPhone|iPad/.test(navigator.userAgent)
+    ? 'iPhone Safari and Chrome cannot use Bluetooth from websites. Install the free <b>Bluefy – Web BLE Browser</b> app from the App Store and open this page in it.'
+    : 'This browser has no Web Bluetooth. Use Chrome or Edge on Android, Windows, macOS or ChromeOS (or Bluefy on iPhone).';
+}
+function linkStats() {
+  if (!client) return '<span class="dim">No session</span>';
+  const age = st.vAt ? ((Date.now() - st.vAt) / 1000).toFixed(2) + ' s' : '—';
+  return `Packets ${client.dec.packets} · CRC errors ${client.dec.crcErrors} · framing errors ${client.dec.framingErrors}<br>RX ${client.rx} B · TX ${client.tx} B · last sample ${age}`;
+}
+function viewBT() {
+  const v = st.v, fw = st.fw;
+  const apps = ['None', 'PPM', 'ADC', 'UART', 'PPM + UART', 'ADC + UART', 'Nunchuk', 'NRF', 'Custom', 'PAS', 'ADC + PAS'];
+  return `<h1>Bluetooth &amp; diagnostics</h1>
+  <section class="card"><div class="head"><span class="dot ${statusDot()}"></span><span>${esc(statusLine())}</span></div>
+    ${!navigator.bluetooth ? `<p class="warn small">${bluetoothHelp()}</p>` : ''}
+    <div class="row">${st.source === 'none' ? '<button class="btn primary" data-act="connect">Connect Bluetooth</button><button class="btn amber" data-act="demo">Demo mode</button>' : st.source === 'demo' ? '<button class="btn" data-act="disconnect">Leave demo</button>' : '<button class="btn danger" data-act="disconnect">Disconnect</button>'}
+    ${st.source === 'ble' && !st.ready && client ? '<button class="btn" data-act="retry">Retry handshake</button>' : ''}</div>
+    <label class="chk"><input type="checkbox" data-setting="autoReconnect" ${S.autoReconnect ? 'checked' : ''}> Auto-reconnect</label>
+    ${st.uart ? `<p class="small dim">UART: ${esc(st.uart)}</p>` : ''}
+    <p class="small faint">Needs a BLE-to-UART module on the controller's UART port (VESC BLE/NRF module, VESC Express, or HM-10-style), with UART enabled on the VESC at the module's baud rate. Keep your throttle working: App to Use = "ADC and UART".</p></section>
+  <section class="card"><div class="lbl">Controller</div>${fw ? `<div class="kv">
+    <span>Firmware</span><b>${fw.version}</b><span>Hardware</span><b>${esc(fw.hw)}</b><span>UUID</span><b class="mono small">${fw.uuid}</b>
+    <span>Motor config</span><b>${st.mc ? 'Verified layout' : esc(st.mcErr || '—')}</b><span>App config</span><b>${st.app ? 'Verified layout' : esc(st.appErr || '—')}</b>
+    <span>Temporary limits</span><b>${st.tempOK ? 'Supported' : 'Not supported'}</b><span>Throttle app</span><b>${appToUse() == null ? '—' : apps[appToUse()] || appToUse()}</b>
+    ${v ? `<span>Fault</span><b class="${v.fault ? 'red' : ''}">${C.faultName(v.fault)}</b>${v.tempMosfets ? `<span>MOSFET NTCs</span><b>${v.tempMosfets.map((x) => x.toFixed(1)).join(' / ')} °C</b>` : ''}
+    ${v.status != null ? `<span>Kill switch</span><b>${v.status & 2 ? 'ACTIVE' : 'off'}</b>` : ''}<span>Ah used / charged</span><b>${show(v.ah, 2)} / ${show(v.ahCharged, 2)}</b><span>Wh used / charged</span><b>${show(v.wh, 1)} / ${show(v.whCharged, 1)}</b>` : ''}</div>` : '<p class="dim">Not connected</p>'}</section>
+  <section class="card"><div class="lbl">Safety</div>
+    <label class="chk big"><input type="checkbox" data-act="readonly" ${S.readOnly ? 'checked' : ''}> Read-only mode <span class="small ${S.readOnly ? 'green' : 'amber'}">${S.readOnly ? '— nothing is ever written' : '— writes allowed after confirmation'}</span></label>
+    <label class="chk"><input type="checkbox" data-setting="vibrate" ${S.vibrate ? 'checked' : ''}> Vibrate on alerts (where supported)</label>
+    <div class="row"><button class="btn" data-act="backupnow" ${st.ready ? '' : 'disabled'}>Back up configuration now</button><button class="btn" data-act="backups">Backups (${backups.length})</button></div>
+    <p class="small faint">The app never sends motor commands, never accelerates the motor, and does not replace your brakes. Losing Bluetooth does not stop the scooter.</p></section>
+  <section class="card"><div class="lbl">Setup</div><div class="row">
+    <button class="btn" data-act="vehicle">Vehicle &amp; battery ${S.geometryConfirmed ? '✓' : '<span class="amber">(not confirmed)</span>'}</button>
+    <button class="btn" data-act="hw">Hardware limits ${S.hwConfirmed ? '✓' : '<span class="amber">(not confirmed)</span>'}</button></div>
+    <label>Telemetry rate: <b id="hzv">${S.pollHz}</b> Hz<input type="range" min="2" max="20" value="${S.pollHz}" data-setting="pollHz"></label></section>
+  <section class="card"><div class="lbl">Link statistics</div><p class="small mono" id="linkstats">${linkStats()}</p></section>
+  <section class="card"><div class="head"><span class="lbl">Console</span><span class="sp"></span><label class="chk small"><input type="checkbox" data-setting-st="traffic" ${st.traffic ? 'checked' : ''}> raw packets</label><button class="btn ghost small" data-act="clearlog">Clear</button></div><div id="console" class="console"></div></section>
+  <p class="foot">VESCDash web · protocol verified against VESC firmware source (vedderb/bldc, GPL-3.0)</p>`;
+}
+function renderConsole() { const c = $('#console'); if (c) c.innerHTML = st.console.slice(-120).reverse().map((l) => `<div><span class="faint">${l.t.toLocaleTimeString()}</span> ${esc(l.s)}</div>`).join(''); }
+
+function vehicleSetup() {
+  const g = S.geometry, b = S.battery;
+  modal('Vehicle & battery setup', `<div class="lbl">Wheel &amp; motor</div>
+    <label>Wheel diameter (mm)<input type="number" id="vs-wheel" value="${Math.round(g.wheelDiameter * 1000)}"></label>
+    <label>Motor pole pairs<input type="number" id="vs-pp" value="${g.polePairs}"></label>
+    <label>Gear ratio (hub motor = 1)<input type="number" id="vs-gear" value="${g.gearRatio}" step="0.01"></label>
+    ${st.mc || st.temp ? '<button class="btn small" id="vs-import">Import from controller</button>' : ''}
+    <p class="small dim">Measure the loaded tyre's outer diameter. Pole pairs = magnets ÷ 2 (VESC Tool "motor poles" ÷ 2). Check: dashboard speed must match GPS speed.</p>
+    <div class="lbl">Battery</div>
+    <label>Cells in series<input type="number" id="vs-cells" value="${b.cells}"></label>
+    <label>Full voltage (V)<input type="number" id="vs-full" value="${b.full}" step="0.1"></label>
+    <label>Empty voltage (V)<input type="number" id="vs-empty" value="${b.empty}" step="0.1"></label>
+    <label>Capacity (Ah)<input type="number" id="vs-ah" value="${b.capacityAh}" step="0.5"></label>
+    <label>Low warning (%)<input type="number" id="vs-low" value="${b.low}"></label><label>Critical warning (%)<input type="number" id="vs-crit" value="${b.critical}"></label>
+    <p class="small dim">16S Li-ion: full 67.2 V. Empty 48.0 V = 3.0 V/cell; raise it if your BMS cuts off earlier.</p>`,
+  [['Cancel'], ['Save & confirm', () => {
+    const ng = { wheelDiameter: +$('#vs-wheel').value / 1000, polePairs: Math.round(+$('#vs-pp').value), gearRatio: +$('#vs-gear').value };
+    if (!C.geometryValid(ng)) { modalInfo('Setup', 'Wheel diameter, pole pairs or gear ratio look invalid.'); return; }
+    S.geometry = ng; S.geometryConfirmed = true;
+    S.battery = { cells: +$('#vs-cells').value, full: +$('#vs-full').value, empty: +$('#vs-empty').value, capacityAh: +$('#vs-ah').value, low: +$('#vs-low').value, critical: +$('#vs-crit').value };
+    saveSettings(); render();
+  }, 'primary']]);
+  const imp = $('#vs-import');
+  if (imp) imp.onclick = () => {
+    const poles = st.mc ? st.mc.get('si_motor_poles') : st.temp && st.temp.poles, wheel = st.mc ? st.mc.get('si_wheel_diameter') : st.temp && st.temp.wheelDiameter, gear = st.mc ? st.mc.get('si_gear_ratio') : st.temp && st.temp.gearRatio;
+    if (poles >= 2 && wheel > 0.05) { $('#vs-wheel').value = Math.round(wheel * 1000); $('#vs-pp').value = Math.round(poles / 2); $('#vs-gear').value = gear || 1; imp.textContent = 'Imported — check the values'; }
+    else imp.textContent = 'Controller has no usable values';
+  };
+}
+
+function hardwareSetup() {
+  const h = S.hw;
+  modal('Hardware limits', `<p class="small dim">Defaults: FSESC 75/200 Pro model designation (75 V / 200 A) and your current 55 A battery setting; 10 A regen is a placeholder. Enter your battery/BMS real ratings.</p>
+    <label>Controller max voltage (V)<input type="number" id="hw-v" value="${h.maxVoltage}"></label>
+    <label>Controller max motor current (A)<input type="number" id="hw-mc" value="${h.maxMotorCurrent}"></label>
+    <label>Battery max discharge (A)<input type="number" id="hw-bd" value="${h.battMaxDischarge}"></label>
+    <label>Battery max charge / regen (A)<input type="number" id="hw-bc" value="${h.battMaxCharge}"></label>
+    <label>Max MOSFET cutoff (°C)<input type="number" id="hw-ft" value="${h.maxFetCutoff}"></label>
+    <label>Max motor cutoff (°C)<input type="number" id="hw-mt" value="${h.maxMotorCutoff}"></label>
+    <label>Field weakening ≤ % of motor current<input type="number" id="hw-fw" value="${Math.round(h.maxFwFraction * 100)}"></label>
+    <label>Absolute speed limit (km/h)<input type="number" id="hw-sp" value="${h.maxSpeedKmh}"></label>`,
+  [['Cancel'], ['Save & confirm', () => {
+    Object.assign(S.hw, { maxVoltage: +$('#hw-v').value, maxMotorCurrent: +$('#hw-mc').value, battMaxDischarge: +$('#hw-bd').value, battMaxCharge: +$('#hw-bc').value, maxFetCutoff: +$('#hw-ft').value, maxMotorCutoff: +$('#hw-mt').value, maxFwFraction: +$('#hw-fw').value / 100, maxSpeedKmh: +$('#hw-sp').value });
+    S.hwConfirmed = true; saveSettings(); render();
+  }, 'primary']]);
+}
+
+function backupsView() {
+  modal('Configuration backups', `<p class="small dim">Stored in this browser. Download a copy to keep it safe. Restoring only works on the same controller with the same firmware layout, and makes a new backup first.</p>
+    <div class="row"><button class="btn small" id="bk-dl">Download all</button><label class="btn small">Import file<input type="file" id="bk-up" accept=".json" hidden></label></div>
+    ${backups.length ? backups.map((b) => `<div class="chg"><b>${b.kind === 'mcconf' ? 'Motor' : 'App'} config · FW ${b.fw}</b> <span class="small dim">${new Date(b.at).toLocaleString()}</span>
+      <div class="small dim">${esc(b.note)}${st.fw && b.uuid !== st.fw.uuid ? ' · <span class="amber">different controller</span>' : ''}</div>
+      <button class="btn small" data-restore="${b.id}" ${st.ready ? '' : 'disabled'}>Restore…</button></div>`).join('') : '<p class="dim">No backups yet.</p>'}`, [['Close']]);
+  $('#bk-dl').onclick = downloadBackups;
+  $('#bk-up').onchange = async (e) => { try { const arr = JSON.parse(await e.target.files[0].text()); const ids = new Set(backups.map((b) => b.id)); backups = backups.concat(arr.filter((b) => b.hex && !ids.has(b.id))).sort((a, b) => b.at - a.at); saveBackups(); backupsView(); } catch (err) { modalInfo('Import', err.message); } };
+  $('#modal').addEventListener('click', (e) => {
+    const id = e.target.dataset.restore; if (!id) return;
+    const bk = backups.find((b) => b.id === id); let summary = 'Cannot compare with the connected controller.';
+    try { const t = new C.ConfigBlob(bk.kind, C.unhex(bk.hex)), cur = bk.kind === 'mcconf' ? st.mc : st.app; const ch = cur && cur.sig === t.sig ? t.changes(cur) : null; if (ch) summary = ch.length ? `${ch.length} field(s) will change:<br>` + ch.slice(0, 12).map((c) => `<span class="mono small">${esc(c.name)}: ${show(c.old, 3)} → ${show(c.new, 3)}</span>`).join('<br>') : 'Identical to current configuration.'; } catch {}
+    modal('Restore this backup?', `<p>${summary}</p><p class="small">Scooter must be stationary with throttle released.</p>`, [['Cancel'], ['Restore', () => runTask(() => restoreBackup(bk)), 'danger', S.readOnly]]);
+  });
+}
+
+// ---------------- modal helpers ----------------
+function modal(title, body, buttons) {
+  const m = $('#modal'); const fresh = m.cloneNode(false); m.replaceWith(fresh);
+  fresh.innerHTML = `<div class="sheet"><h2>${esc(title)}</h2><div class="body">${body}</div><div class="actions">${buttons.map(([l, , cls, dis], i) => `<button class="btn ${cls || ''}" data-i="${i}" ${dis ? 'disabled' : ''}>${l}</button>`).join('')}</div></div>`;
+  fresh.hidden = false;
+  fresh.querySelectorAll('.actions button').forEach((b) => b.onclick = () => { const fn = buttons[+b.dataset.i][1]; closeModal(); fn && fn(); });
+  fresh.onclick = (e) => { if (e.target === fresh) closeModal(); };
+}
+function closeModal() { $('#modal').hidden = true; }
+function modalInfo(title, html) { modal(title, `<p>${html.replace(/\n/g, '<br>')}</p>`, [['OK', null, 'primary']]); }
+async function runTask(fn) {
+  modal('Working…', '<div class="spinner"></div><p class="center dim">Checking the scooter is stationary and talking to the controller…</p>', []);
+  try { const msg = await fn(); modalInfo('Done', esc(msg)); } catch (e) { modalInfo('Not done', esc(e.message)); }
+  render();
+}
+
+// ---------------- events ----------------
+document.addEventListener('click', (e) => {
+  const tb = e.target.closest('[data-tab]'); if (tb) { st.tab = tb.dataset.tab; render(); window.scrollTo(0, 0); return; }
+  const rg = e.target.closest('[data-range]'); if (rg) { graphRange = +rg.dataset.range; render(); return; }
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const k = el.dataset.k;
+  switch (el.dataset.act) {
+    case 'connect': connectBLE(); break;
+    case 'demo': startDemo(); break;
+    case 'disconnect': disconnect(); break;
+    case 'retry': if (transport) beginSession(transport); break;
+    case 'rec': st.recording ? stopRecording() : startRecording(); break;
+    case 'resettrip': st.trip.reset(); break;
+    case 'plan': reviewPlan(k); break;
+    case 'editprofile': editProfile(k); break;
+    case 'restore': modal('Restore normal limits?', '<p>Scooter must be stationary with the throttle released.</p>', [['Cancel'], ['Restore', () => runTask(restoreBaseline), 'primary']]); break;
+    case 'recapture': baselines[uuid()] = { limits: st.temp, appHex: st.app ? C.hex(st.app.bytes) : null, at: Date.now() }; saveBaselines(); st.tempUnknown = false; st.activeProfile = null; st.profileStatus = 'Baseline re-captured.'; render(); break;
+    case 'reloadcfg': runTask(async () => { await refreshConfig('mcconf'); await refreshConfig('appconf'); return 'Configuration reloaded.'; }); break;
+    case 'review': reviewChanges(); break;
+    case 'backupnow': runTask(backupNow); break;
+    case 'backups': backupsView(); break;
+    case 'vehicle': vehicleSetup(); break;
+    case 'hw': hardwareSetup(); break;
+    case 'clearlog': st.console = []; renderConsole(); break;
+    case 'readonly':
+      e.preventDefault();
+      if (S.readOnly) modal('Enable writing to the controller?', '<p>Profiles and settings changes will be sent to your controller after confirmation. Wrong settings can damage the controller, motor or battery, or make the scooter unsafe. Backups are made automatically before every write.</p>',
+        [['Keep read-only'], ['Enable writes', () => { S.readOnly = false; saveSettings(); render(); }, 'danger']]);
+      else { S.readOnly = true; saveSettings(); render(); }
+      break;
+  }
+});
+document.addEventListener('change', (e) => {
+  const t = e.target;
+  if (t.dataset.setting) { S[t.dataset.setting] = t.type === 'checkbox' ? t.checked : +t.value; saveSettings(); if (t.dataset.setting === 'pollHz') $('#hzv').textContent = t.value; }
+  if (t.dataset.settingSt) st[t.dataset.settingSt] = t.checked;
+  if (t.dataset.field) {
+    const blob = t.dataset.kind === 'mcconf' ? st.editMc : st.editApp;
+    try { blob.set(t.dataset.field, +t.value / +t.dataset.factor); } catch (err) { modalInfo('Invalid value', esc(err.message)); }
+    render();
+  }
+});
+document.addEventListener('input', (e) => { if (e.target.dataset.setting === 'pollHz') $('#hzv').textContent = e.target.value; });
+setInterval(() => { if (st.tab === 'bt' && $('#linkstats')) $('#linkstats').innerHTML = linkStats(); }, 1000);
+
+render();
+
+})();
+</script></body></html>
